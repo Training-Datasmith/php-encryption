@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Defuse\Crypto;
 
 use Defuse\Crypto\Exception as Ex;
 
 final class Encoding
 {
-    const CHECKSUM_BYTE_SIZE     = 32;
-    const CHECKSUM_HASH_ALGO     = 'sha256';
-    const SERIALIZE_HEADER_BYTES = 4;
+    public const CHECKSUM_BYTE_SIZE     = 32;
+    public const CHECKSUM_HASH_ALGO     = 'sha256';
+    public const SERIALIZE_HEADER_BYTES = 4;
 
     /**
      * Converts a byte string to a hexadecimal string without leaking
@@ -78,7 +80,7 @@ final class Encoding
         }
         return $bin;
     }
-    
+
     /**
      * Remove trialing whitespace without table look-ups or branches.
      *
@@ -101,7 +103,7 @@ final class Encoding
 
             /* Null Byte (0x00), a.k.a. \0 */
             // if ($chr === 0x00) $length -= 1;
-            $sub = (($chr - 1) >> 8 ) & 1;
+            $sub = (($chr - 1) >> 8) & 1;
             $length -= $sub;
             $last -= $sub;
 
@@ -179,8 +181,7 @@ final class Encoding
         $header,
         #[\SensitiveParameter]
         $bytes
-    )
-    {
+    ) {
         // Headers must be a constant length to prevent one type's header from
         // being a prefix of another type's header, leading to ambiguity.
         Core::ensureTrue(
@@ -215,8 +216,7 @@ final class Encoding
         $expected_header,
         #[\SensitiveParameter]
         $string
-    )
-    {
+    ) {
         // Headers must be a constant length to prevent one type's header from
         // being a prefix of another type's header, leading to ambiguity.
         Core::ensureTrue(

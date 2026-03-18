@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Defuse\Crypto;
 
 use Defuse\Crypto\Exception as Ex;
 
 final class KeyOrPassword
 {
-    const PBKDF2_ITERATIONS    = 100000;
-    const SECRET_TYPE_KEY      = 1;
-    const SECRET_TYPE_PASSWORD = 2;
+    public const PBKDF2_ITERATIONS    = 100000;
+    public const SECRET_TYPE_KEY      = 1;
+    public const SECRET_TYPE_PASSWORD = 2;
 
     /**
      * @var int
@@ -41,8 +43,7 @@ final class KeyOrPassword
     public static function createFromPassword(
         #[\SensitiveParameter]
         $password
-    )
-    {
+    ) {
         return new KeyOrPassword(self::SECRET_TYPE_PASSWORD, $password);
     }
 
@@ -137,8 +138,7 @@ final class KeyOrPassword
         $secret_type,
         #[\SensitiveParameter]
         $secret
-    )
-    {
+    ) {
         // The constructor is private, so these should never throw.
         if ($secret_type === self::SECRET_TYPE_KEY) {
             Core::ensureTrue($secret instanceof Key);

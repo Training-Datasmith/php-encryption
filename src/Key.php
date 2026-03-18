@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Defuse\Crypto;
 
 use Defuse\Crypto\Exception as Ex;
 
 final class Key
 {
-    const KEY_CURRENT_VERSION = "\xDE\xF0\x00\x00";
-    const KEY_BYTE_SIZE       = 32;
+    public const KEY_CURRENT_VERSION = "\xDE\xF0\x00\x00";
+    public const KEY_BYTE_SIZE       = 32;
 
     /**
      * @var string
@@ -45,8 +47,7 @@ final class Key
         #[\SensitiveParameter]
         $saved_key_string,
         $do_not_trim = false
-    )
-    {
+    ) {
         if (!$do_not_trim) {
             $saved_key_string = Encoding::trimTrailingWhitespace($saved_key_string);
         }
@@ -89,8 +90,7 @@ final class Key
     private function __construct(
         #[\SensitiveParameter]
         $bytes
-    )
-    {
+    ) {
         Core::ensureTrue(
             Core::ourStrlen($bytes) === self::KEY_BYTE_SIZE,
             'Bad key length.'

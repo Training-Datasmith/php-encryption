@@ -1,6 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Defuse\Crypto;
+
 use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
 class FileTest extends TestCase
@@ -44,20 +47,29 @@ class FileTest extends TestCase
         $reverse1 = self::$TEMP_DIR . '/rv1';
         File::decryptFile($dest1, $reverse1, $this->key);
         $this->assertFileExists($reverse1);
-        $this->assertSame(md5_file($src), md5_file($reverse1),
-            'File and encrypted-decrypted file do not match.');
+        $this->assertSame(
+            md5_file($src),
+            md5_file($reverse1),
+            'File and encrypted-decrypted file do not match.'
+        );
 
         $dest2  = self::$TEMP_DIR . '/ff2';
         File::encryptFile($reverse1, $dest2, $this->key);
         $this->assertFileExists($dest2);
 
-        $this->assertNotEquals(md5_file($dest1), md5_file($dest2),
-            'First and second encryption produced identical files.');
+        $this->assertNotEquals(
+            md5_file($dest1),
+            md5_file($dest2),
+            'First and second encryption produced identical files.'
+        );
 
         $reverse2 = self::$TEMP_DIR . '/rv2';
         File::decryptFile($dest2, $reverse2, $this->key);
-        $this->assertSame(md5_file($src), md5_file($reverse2),
-            'File and encrypted-decrypted file do not match.');
+        $this->assertSame(
+            md5_file($src),
+            md5_file($reverse2),
+            'File and encrypted-decrypted file do not match.'
+        );
     }
 
     /**
@@ -78,20 +90,29 @@ class FileTest extends TestCase
         $reverse1 = self::$TEMP_DIR . '/rv1';
         File::decryptFileWithPassword($dest1, $reverse1, 'password');
         $this->assertFileExists($reverse1);
-        $this->assertSame(md5_file($src), md5_file($reverse1),
-            'File and encrypted-decrypted file do not match.');
+        $this->assertSame(
+            md5_file($src),
+            md5_file($reverse1),
+            'File and encrypted-decrypted file do not match.'
+        );
 
         $dest2  = self::$TEMP_DIR . '/ff2';
         File::encryptFileWithPassword($reverse1, $dest2, 'password');
         $this->assertFileExists($dest2);
 
-        $this->assertNotEquals(md5_file($dest1), md5_file($dest2),
-            'First and second encryption produced identical files.');
+        $this->assertNotEquals(
+            md5_file($dest1),
+            md5_file($dest2),
+            'First and second encryption produced identical files.'
+        );
 
         $reverse2 = self::$TEMP_DIR . '/rv2';
         File::decryptFileWithPassword($dest2, $reverse2, 'password');
-        $this->assertSame(md5_file($src), md5_file($reverse2),
-            'File and encrypted-decrypted file do not match.');
+        $this->assertSame(
+            md5_file($src),
+            md5_file($reverse2),
+            'File and encrypted-decrypted file do not match.'
+        );
     }
 
     /**
@@ -118,8 +139,11 @@ class FileTest extends TestCase
         fclose($src2);
         fclose($dest2);
 
-        $this->assertSame(md5_file($srcName), md5_file(self::$TEMP_DIR . '/dest2'),
-            'Original file mismatches the result of encrypt and decrypt');
+        $this->assertSame(
+            md5_file($srcName),
+            md5_file(self::$TEMP_DIR . '/dest2'),
+            'Original file mismatches the result of encrypt and decrypt'
+        );
     }
 
     /**
@@ -146,8 +170,11 @@ class FileTest extends TestCase
         fclose($src2);
         fclose($dest2);
 
-        $this->assertSame(md5_file($srcName), md5_file(self::$TEMP_DIR . '/dest2'),
-            'Original file mismatches the result of encrypt and decrypt');
+        $this->assertSame(
+            md5_file($srcName),
+            md5_file(self::$TEMP_DIR . '/dest2'),
+            'Original file mismatches the result of encrypt and decrypt'
+        );
     }
 
     public function testDecryptBadMagicNumber()

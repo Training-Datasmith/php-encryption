@@ -1,6 +1,8 @@
 <?php
 
-use \Defuse\Crypto\KeyProtectedByPassword;
+declare(strict_types=1);
+
+use Defuse\Crypto\KeyProtectedByPassword;
 use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
 class PasswordTest extends TestCase
@@ -47,7 +49,7 @@ class PasswordTest extends TestCase
     /**
      * Check that changing the password actually changes the password.
      */
-    function testPasswordActuallyChanges()
+    public function testPasswordActuallyChanges()
     {
         $pkey1 = KeyProtectedByPassword::createRandomPasswordProtectedKey('password');
         $pkey1->changePassword('password', 'new password');
@@ -56,7 +58,7 @@ class PasswordTest extends TestCase
         $pkey1->unlockKey('password');
     }
 
-    function testMalformedLoad()
+    public function testMalformedLoad()
     {
         $pkey1 = KeyProtectedByPassword::createRandomPasswordProtectedKey('password');
         $pkey1_enc_ascii = $pkey1->saveToAsciiSafeString();

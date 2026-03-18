@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Defuse\Crypto;
 
 use Defuse\Crypto\Exception as Ex;
@@ -42,8 +44,7 @@ final class File
         $outputFilename,
         #[\SensitiveParameter]
         $password
-    )
-    {
+    ) {
         self::encryptFileInternal(
             $inputFilename,
             $outputFilename,
@@ -89,8 +90,7 @@ final class File
         $outputFilename,
         #[\SensitiveParameter]
         $password
-    )
-    {
+    ) {
         self::decryptFileInternal(
             $inputFilename,
             $outputFilename,
@@ -137,8 +137,7 @@ final class File
         $outputHandle,
         #[\SensitiveParameter]
         $password
-    )
-    {
+    ) {
         self::encryptResourceInternal(
             $inputHandle,
             $outputHandle,
@@ -185,8 +184,7 @@ final class File
         $outputHandle,
         #[\SensitiveParameter]
         $password
-    )
-    {
+    ) {
         self::decryptResourceInternal(
             $inputHandle,
             $outputHandle,
@@ -608,7 +606,7 @@ final class File
             /** @var mixed $chunk_mac */
             $chunk_mac = \hash_copy($hmac);
             Core::ensureTrue(\is_resource($chunk_mac) || \is_object($chunk_mac), 'Cannot duplicate a hash context');
-            $macs []= \hash_final($chunk_mac);
+            $macs [] = \hash_final($chunk_mac);
         }
 
         /* Get the final HMAC, which should match the stored one. */
@@ -808,7 +806,8 @@ final class File
      *
      * @return void
      */
-    private static function removePHPUnitErrorHandler() {
+    private static function removePHPUnitErrorHandler()
+    {
         if (defined('PHPUNIT_COMPOSER_INSTALL') || defined('__PHPUNIT_PHAR__')) {
             set_error_handler(null);
         }
@@ -819,7 +818,8 @@ final class File
      *
      * @return void
      */
-    private static function restorePHPUnitErrorHandler() {
+    private static function restorePHPUnitErrorHandler()
+    {
         if (defined('PHPUNIT_COMPOSER_INSTALL') || defined('__PHPUNIT_PHAR__')) {
             restore_error_handler();
         }

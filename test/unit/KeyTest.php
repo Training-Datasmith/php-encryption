@@ -1,7 +1,9 @@
 <?php
 
-use \Defuse\Crypto\Core;
-use \Defuse\Crypto\Key;
+declare(strict_types=1);
+
+use Defuse\Crypto\Core;
+use Defuse\Crypto\Key;
 use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
 class KeyTest extends TestCase

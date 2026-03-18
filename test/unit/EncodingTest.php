@@ -1,7 +1,9 @@
 <?php
 
-use \Defuse\Crypto\Encoding;
-use \Defuse\Crypto\Core;
+declare(strict_types=1);
+
+use Defuse\Crypto\Core;
+use Defuse\Crypto\Encoding;
 use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
 class EncodingTest extends TestCase
@@ -54,14 +56,14 @@ class EncodingTest extends TestCase
             $header,
             Core::secureRandom(Core::KEY_BYTE_SIZE)
         );
-        $str[2*Encoding::SERIALIZE_HEADER_BYTES + 0] = 'f';
-        $str[2*Encoding::SERIALIZE_HEADER_BYTES + 1] = 'f';
-        $str[2*Encoding::SERIALIZE_HEADER_BYTES + 3] = 'f';
-        $str[2*Encoding::SERIALIZE_HEADER_BYTES + 4] = 'f';
-        $str[2*Encoding::SERIALIZE_HEADER_BYTES + 5] = 'f';
-        $str[2*Encoding::SERIALIZE_HEADER_BYTES + 6] = 'f';
-        $str[2*Encoding::SERIALIZE_HEADER_BYTES + 7] = 'f';
-        $str[2*Encoding::SERIALIZE_HEADER_BYTES + 8] = 'f';
+        $str[2 * Encoding::SERIALIZE_HEADER_BYTES + 0] = 'f';
+        $str[2 * Encoding::SERIALIZE_HEADER_BYTES + 1] = 'f';
+        $str[2 * Encoding::SERIALIZE_HEADER_BYTES + 3] = 'f';
+        $str[2 * Encoding::SERIALIZE_HEADER_BYTES + 4] = 'f';
+        $str[2 * Encoding::SERIALIZE_HEADER_BYTES + 5] = 'f';
+        $str[2 * Encoding::SERIALIZE_HEADER_BYTES + 6] = 'f';
+        $str[2 * Encoding::SERIALIZE_HEADER_BYTES + 7] = 'f';
+        $str[2 * Encoding::SERIALIZE_HEADER_BYTES + 8] = 'f';
         $this->expectException(\Defuse\Crypto\Exception\BadFormatException::class);
         $this->expectExceptionMessage("checksum doesn't match");
         Encoding::loadBytesFromChecksummedAsciiSafeString($header, $str);

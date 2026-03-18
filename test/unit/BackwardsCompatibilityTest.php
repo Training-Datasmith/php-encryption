@@ -1,20 +1,22 @@
 <?php
 
-use \Defuse\Crypto\Crypto;
-use \Defuse\Crypto\Encoding;
-use \Defuse\Crypto\Key;
+declare(strict_types=1);
+
+use Defuse\Crypto\Crypto;
+use Defuse\Crypto\Encoding;
+use Defuse\Crypto\Key;
 use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
 class BackwardsCompatibilityTest extends TestCase
 {
-
     /* helper function to create a key with raw bytes */
-    public function keyHelper($rawkey) {
+    public function keyHelper($rawkey)
+    {
         $key = Key::createNewRandomKey();
         $func = function ($bytes) {
-                $this->key_bytes = $bytes;
+            $this->key_bytes = $bytes;
         };
-        $helper = $func->bindTo($key,$key);
+        $helper = $func->bindTo($key, $key);
         $helper($rawkey);
         return $key;
     }
@@ -37,7 +39,7 @@ class BackwardsCompatibilityTest extends TestCase
         /* Make it try to parse the binary as hex. */
         $plain = Crypto::decrypt(
             $cipher,
-            $this->keyHelper (
+            $this->keyHelper(
                 "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F" .
                 "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F"
             ),
@@ -63,7 +65,7 @@ class BackwardsCompatibilityTest extends TestCase
         /* This time, treat the binary as binary. */
         $plain = Crypto::decrypt(
             $cipher,
-            $this->keyHelper (
+            $this->keyHelper(
                 "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F" .
                 "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F"
             ),

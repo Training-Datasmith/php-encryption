@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Defuse\Crypto;
 
 use Defuse\Crypto\Exception as Ex;

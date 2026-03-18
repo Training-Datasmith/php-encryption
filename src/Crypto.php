@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Defuse\Crypto;
 
 use Defuse\Crypto\Exception as Ex;
@@ -60,8 +62,7 @@ class Crypto
         #[\SensitiveParameter]
         $password,
         $raw_binary = false
-    )
-    {
+    ) {
         if (!\is_string($plaintext)) {
             throw new \TypeError(
                 'String expected for argument 1. ' . \ucfirst(\gettype($plaintext)) . ' given instead.'
@@ -140,8 +141,7 @@ class Crypto
         #[\SensitiveParameter]
         $password,
         $raw_binary = false
-    )
-    {
+    ) {
         if (!\is_string($ciphertext)) {
             throw new \TypeError(
                 'String expected for argument 1. ' . \ucfirst(\gettype($ciphertext)) . ' given instead.'
@@ -180,8 +180,7 @@ class Crypto
         $ciphertext,
         #[\SensitiveParameter]
         $key
-    )
-    {
+    ) {
         if (!\is_string($ciphertext)) {
             throw new \TypeError(
                 'String expected for argument 1. ' . \ucfirst(\gettype($ciphertext)) . ' given instead.'
@@ -389,8 +388,7 @@ class Crypto
         $key,
         #[\SensitiveParameter]
         $iv
-    )
-    {
+    ) {
         Core::ensureConstantExists('OPENSSL_RAW_DATA');
         Core::ensureFunctionExists('openssl_encrypt');
         /** @var string $ciphertext */
@@ -426,8 +424,7 @@ class Crypto
         #[\SensitiveParameter]
         $iv,
         $cipherMethod
-    )
-    {
+    ) {
         Core::ensureConstantExists('OPENSSL_RAW_DATA');
         Core::ensureFunctionExists('openssl_decrypt');
 
@@ -460,8 +457,7 @@ class Crypto
         $message,
         #[\SensitiveParameter]
         $key
-    )
-    {
+    ) {
         $message_hmac = \hash_hmac(Core::HASH_FUNCTION_NAME, $message, $key, true);
         return Core::hashEquals($message_hmac, $expected_hmac);
     }

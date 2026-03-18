@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Defuse\Crypto;
 
 use Defuse\Crypto\Exception as Ex;
 
 final class KeyProtectedByPassword
 {
-    const PASSWORD_KEY_CURRENT_VERSION = "\xDE\xF1\x00\x00";
+    public const PASSWORD_KEY_CURRENT_VERSION = "\xDE\xF1\x00\x00";
 
     /**
      * @var string
@@ -25,8 +27,7 @@ final class KeyProtectedByPassword
     public static function createRandomPasswordProtectedKey(
         #[\SensitiveParameter]
         $password
-    )
-    {
+    ) {
         $inner_key = Key::createNewRandomKey();
         /* The password is hashed as a form of poor-man's domain separation
          * between this use of encryptWithPassword() and other uses of
@@ -53,8 +54,7 @@ final class KeyProtectedByPassword
     public static function loadFromAsciiSafeString(
         #[\SensitiveParameter]
         $saved_key_string
-    )
-    {
+    ) {
         $encrypted_key = Encoding::loadBytesFromChecksummedAsciiSafeString(
             self::PASSWORD_KEY_CURRENT_VERSION,
             $saved_key_string
@@ -91,8 +91,7 @@ final class KeyProtectedByPassword
     public function unlockKey(
         #[\SensitiveParameter]
         $password
-    )
-    {
+    ) {
         try {
             $inner_key_encoded = Crypto::decryptWithPassword(
                 $this->encrypted_key,
@@ -107,8 +106,8 @@ final class KeyProtectedByPassword
              * here in order to make the API simpler, avoiding the need to
              * document that this method might throw an Ex\BadFormatException. */
             throw new Ex\WrongKeyOrModifiedCiphertextException(
-                "The decrypted key was found to be in an invalid format. " .
-                "This very likely indicates it was modified by an attacker."
+                'The decrypted key was found to be in an invalid format. ' .
+                'This very likely indicates it was modified by an attacker.'
             );
         }
     }
@@ -129,8 +128,7 @@ final class KeyProtectedByPassword
         $current_password,
         #[\SensitiveParameter]
         $new_password
-    )
-    {
+    ) {
         $inner_key = $this->unlockKey($current_password);
         /* The password is hashed as a form of poor-man's domain separation
          * between this use of encryptWithPassword() and other uses of

@@ -1,10 +1,12 @@
 <?php
 
-use \Defuse\Crypto\Core;
-use \Defuse\Crypto\Crypto;
-use \Defuse\Crypto\Key;
-use Yoast\PHPUnitPolyfills\TestCases\TestCase;
+declare(strict_types=1);
+
+use Defuse\Crypto\Core;
+use Defuse\Crypto\Crypto;
 use Defuse\Crypto\Exception as Ex;
+use Defuse\Crypto\Key;
+use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
 class CryptoTest extends TestCase
 {
@@ -118,32 +120,32 @@ class CryptoTest extends TestCase
     public function testEncryptTypeErrorB()
     {
         $this->expectException(\TypeError::class);
-        Crypto::encrypt("plaintext", 3, false);
+        Crypto::encrypt('plaintext', 3, false);
     }
 
     public function testEncryptTypeErrorC()
     {
         $key = Key::createNewRandomKey();
         $this->expectException(\TypeError::class);
-        Crypto::encrypt("plaintext", $key, 3);
+        Crypto::encrypt('plaintext', $key, 3);
     }
 
     public function testEncryptWithPasswordTypeErrorA()
     {
         $this->expectException(\TypeError::class);
-        Crypto::encryptWithPassword(3, "password", false);
+        Crypto::encryptWithPassword(3, 'password', false);
     }
 
     public function testEncryptWithPasswordTypeErrorB()
     {
         $this->expectException(\TypeError::class);
-        Crypto::encryptWithPassword("plaintext", 3, false);
+        Crypto::encryptWithPassword('plaintext', 3, false);
     }
 
     public function testEncryptWithPasswordTypeErrorC()
     {
         $this->expectException(\TypeError::class);
-        Crypto::encryptWithPassword("plaintext", "password", 3);
+        Crypto::encryptWithPassword('plaintext', 'password', 3);
     }
 
     public function testDecryptTypeErrorA()
@@ -156,44 +158,44 @@ class CryptoTest extends TestCase
     public function testDecryptTypeErrorB()
     {
         $this->expectException(\TypeError::class);
-        Crypto::decrypt("ciphertext", 3, false);
+        Crypto::decrypt('ciphertext', 3, false);
     }
 
     public function testDecryptTypeErrorC()
     {
         $key = Key::createNewRandomKey();
         $this->expectException(\TypeError::class);
-        Crypto::decrypt("ciphertext", $key, 3);
+        Crypto::decrypt('ciphertext', $key, 3);
     }
 
     public function testDecryptWithPasswordTypeErrorA()
     {
         $this->expectException(\TypeError::class);
-        Crypto::decryptWithPassword(3, "password", false);
+        Crypto::decryptWithPassword(3, 'password', false);
     }
 
     public function testDecryptWithPasswordTypeErrorB()
     {
         $this->expectException(\TypeError::class);
-        Crypto::decryptWithPassword("ciphertext", 3, false);
+        Crypto::decryptWithPassword('ciphertext', 3, false);
     }
 
     public function testDecryptWithPasswordTypeErrorC()
     {
         $this->expectException(\TypeError::class);
-        Crypto::decryptWithPassword("ciphertext", "password", 3);
+        Crypto::decryptWithPassword('ciphertext', 'password', 3);
     }
 
     public function testLegacyDecryptTypeErrorA()
     {
         $this->expectException(\TypeError::class);
-        Crypto::legacyDecrypt(3, "key");
+        Crypto::legacyDecrypt(3, 'key');
     }
 
     public function testLegacyDecryptTypeErrorB()
     {
         $this->expectException(\TypeError::class);
-        Crypto::legacyDecrypt("ciphertext", 3);
+        Crypto::legacyDecrypt('ciphertext', 3);
     }
 
 }

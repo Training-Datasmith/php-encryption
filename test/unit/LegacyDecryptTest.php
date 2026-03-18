@@ -1,8 +1,10 @@
 <?php
 
-use \Defuse\Crypto\Core;
-use \Defuse\Crypto\Crypto;
-use \Defuse\Crypto\Encoding;
+declare(strict_types=1);
+
+use Defuse\Crypto\Core;
+use Defuse\Crypto\Crypto;
+use Defuse\Crypto\Encoding;
 use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
 class LegacyDecryptTest extends TestCase
@@ -45,10 +47,10 @@ class LegacyDecryptTest extends TestCase
 
     public function testLegacyDecryptTooShort()
     {
-        $too_short = str_repeat("a", Core::LEGACY_MAC_BYTE_SIZE);
+        $too_short = str_repeat('a', Core::LEGACY_MAC_BYTE_SIZE);
         $this->expectException(\Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException::class);
         $this->expectExceptionMessage('short');
-        Crypto::legacyDecrypt($too_short, "0123456789ABCDEF");
+        Crypto::legacyDecrypt($too_short, '0123456789ABCDEF');
     }
 
 }

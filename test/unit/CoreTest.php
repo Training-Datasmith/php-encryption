@@ -1,6 +1,8 @@
 <?php
 
-use \Defuse\Crypto\Core;
+declare(strict_types=1);
+
+use Defuse\Crypto\Core;
 use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
 class CoreTest extends TestCase
