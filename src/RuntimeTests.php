@@ -171,7 +171,7 @@ class RuntimeTests extends Crypto
             'b3bae548aa53d423b0d1f27ebba6f5e5' .
             '673a081d70cce7acfc48'
         );
-        $computed_okm = Core::HKDF('sha1', $ikm, $length, '', null);
+        $computed_okm = Core::HKDF('sha1', $ikm, $length, '');
         Core::ensureTrue($computed_okm === $okm);
     }
 

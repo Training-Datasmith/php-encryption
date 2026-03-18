@@ -11,7 +11,6 @@ final class File
      *
      * @param string $inputFilename
      * @param string $outputFilename
-     * @param Key    $key
      * @return void
      *
      * @throws Ex\EnvironmentIsBrokenException
@@ -57,7 +56,6 @@ final class File
      *
      * @param string $inputFilename
      * @param string $outputFilename
-     * @param Key    $key
      * @return void
      *
      * @throws Ex\EnvironmentIsBrokenException
@@ -106,7 +104,6 @@ final class File
      *
      * @param resource $inputHandle
      * @param resource $outputHandle
-     * @param Key      $key
      * @return void
      *
      * @throws Ex\EnvironmentIsBrokenException
@@ -155,7 +152,6 @@ final class File
      *
      * @param resource $inputHandle
      * @param resource $outputHandle
-     * @param Key      $key
      * @return void
      *
      * @throws Ex\EnvironmentIsBrokenException
@@ -203,7 +199,6 @@ final class File
      *
      * @param string        $inputFilename
      * @param string        $outputFilename
-     * @param KeyOrPassword $secret
      * @return void
      *
      * @throws Ex\CryptoException
@@ -276,7 +271,6 @@ final class File
      *
      * @param string        $inputFilename
      * @param string        $outputFilename
-     * @param KeyOrPassword $secret
      * @return void
      *
      * @throws Ex\CryptoException
@@ -351,7 +345,6 @@ final class File
      *
      * @param resource      $inputHandle
      * @param resource      $outputHandle
-     * @param KeyOrPassword $secret
      * @return void
      *
      * @throws Ex\EnvironmentIsBrokenException
@@ -411,7 +404,7 @@ final class File
         /**
          * @psalm-suppress RedundantCast
          */
-        $inc = (int) (Core::BUFFER_BYTE_SIZE / Core::BLOCK_BYTE_SIZE);
+        $inc = Core::BUFFER_BYTE_SIZE / Core::BLOCK_BYTE_SIZE;
 
         /* Loop until we reach the end of the input file. */
         $at_file_end = false;
@@ -472,7 +465,6 @@ final class File
      *
      * @param resource      $inputHandle
      * @param resource      $outputHandle
-     * @param KeyOrPassword $secret
      * @return void
      *
      * @throws Ex\EnvironmentIsBrokenException
@@ -534,7 +526,7 @@ final class File
         /**
          * @psalm-suppress RedundantCast
          */
-        $inc = (int) (Core::BUFFER_BYTE_SIZE / Core::BLOCK_BYTE_SIZE);
+        $inc = Core::BUFFER_BYTE_SIZE / Core::BLOCK_BYTE_SIZE;
 
         /* Get the HMAC. */
         if (\fseek($inputHandle, (-1 * Core::MAC_BYTE_SIZE), SEEK_END) === -1) {
@@ -671,12 +663,13 @@ final class File
             $calc_mac = \hash_copy($hmac2);
             Core::ensureTrue(\is_resource($calc_mac) || \is_object($calc_mac), 'Cannot duplicate a hash context');
             $calc = \hash_final($calc_mac);
-
             if (empty($macs)) {
                 throw new Ex\WrongKeyOrModifiedCiphertextException(
                     'File was modified after MAC verification'
                 );
-            } elseif (! Core::hashEquals(\array_shift($macs), $calc)) {
+            }
+
+            if (! Core::hashEquals(\array_shift($macs), $calc)) {
                 throw new Ex\WrongKeyOrModifiedCiphertextException(
                     'File was modified after MAC verification'
                 );
@@ -783,7 +776,7 @@ final class File
                     'Could not write to the file'
                 );
             }
-            $buf = (string) Core::ourSubstr($buf, $written, null);
+            $buf = (string) Core::ourSubstr($buf, $written);
             $remaining -= $written;
         }
         return $num_bytes;
@@ -799,9 +792,8 @@ final class File
         $error = error_get_last();
         if ($error === null) {
             return '[no PHP error, or you have a custom error handler set]';
-        } else {
-            return $error['message'];
         }
+        return $error['message'];
     }
 
     /**

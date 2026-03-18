@@ -217,8 +217,7 @@ class Crypto
             Core::LEGACY_HASH_FUNCTION_NAME,
             $key,
             Core::LEGACY_KEY_BYTE_SIZE,
-            Core::LEGACY_AUTHENTICATION_INFO_STRING,
-            null
+            Core::LEGACY_AUTHENTICATION_INFO_STRING
         );
 
         if (self::verifyHMAC($hmac, $messageCiphertext, $akey)) {
@@ -227,8 +226,7 @@ class Crypto
                 Core::LEGACY_HASH_FUNCTION_NAME,
                 $key,
                 Core::LEGACY_KEY_BYTE_SIZE,
-                Core::LEGACY_ENCRYPTION_INFO_STRING,
-                null
+                Core::LEGACY_ENCRYPTION_INFO_STRING
             );
 
             // Extract the IV from the ciphertext.
@@ -252,20 +250,17 @@ class Crypto
             // Do the decryption.
             $plaintext = self::plainDecrypt($actualCiphertext, $ekey, $iv, Core::LEGACY_CIPHER_METHOD);
             return $plaintext;
-        } else {
-            throw new Ex\WrongKeyOrModifiedCiphertextException(
-                'Integrity check failed.'
-            );
         }
+        throw new Ex\WrongKeyOrModifiedCiphertextException(
+            'Integrity check failed.'
+        );
     }
 
     /**
      * Encrypts a string with either a key or a password.
      *
      * @param string        $plaintext
-     * @param KeyOrPassword $secret
      * @param bool          $raw_binary
-     *
      * @return string
      */
     private static function encryptInternal($plaintext, KeyOrPassword $secret, $raw_binary)
@@ -292,12 +287,10 @@ class Crypto
      * Decrypts a ciphertext to a string with either a key or a password.
      *
      * @param string        $ciphertext
-     * @param KeyOrPassword $secret
      * @param bool          $raw_binary
      *
      * @throws Ex\EnvironmentIsBrokenException
      * @throws Ex\WrongKeyOrModifiedCiphertextException
-     *
      * @return string
      */
     private static function decryptInternal($ciphertext, KeyOrPassword $secret, $raw_binary)
@@ -372,13 +365,11 @@ class Crypto
         $keys = $secret->deriveKeys($salt);
 
         if (self::verifyHMAC($hmac, $header . $salt . $iv . $encrypted, $keys->getAuthenticationKey())) {
-            $plaintext = self::plainDecrypt($encrypted, $keys->getEncryptionKey(), $iv, Core::CIPHER_METHOD);
-            return $plaintext;
-        } else {
-            throw new Ex\WrongKeyOrModifiedCiphertextException(
-                'Integrity check failed.'
-            );
+            return self::plainDecrypt($encrypted, $keys->getEncryptionKey(), $iv, Core::CIPHER_METHOD);
         }
+        throw new Ex\WrongKeyOrModifiedCiphertextException(
+            'Integrity check failed.'
+        );
     }
 
     /**

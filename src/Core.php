@@ -296,9 +296,8 @@ final class Core
             $length = \mb_strlen($str, '8bit');
             Core::ensureTrue($length !== false);
             return $length;
-        } else {
-            return \strlen($str);
         }
+        return \strlen($str);
     }
 
     /**
@@ -463,8 +462,7 @@ final class Core
 
         if ($raw_output) {
             return (string) Core::ourSubstr($output, 0, $key_length);
-        } else {
-            return Encoding::binToHex((string) Core::ourSubstr($output, 0, $key_length));
         }
+        return Encoding::binToHex((string) Core::ourSubstr($output, 0, $key_length));
     }
 }
