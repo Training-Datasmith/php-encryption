@@ -115,7 +115,13 @@ final class KeyOrPassword
                 Core::AUTHENTICATION_INFO_STRING,
                 $salt
             );
-            /* Note the cryptographic re-use of $salt here. */
+            /*
+             * The same $salt and $prekey are reused here, but this is safe:
+             * HKDF's info parameter ('encryption' vs 'authentication') provides
+             * cryptographic domain separation between the two derived keys.
+             * Per RFC 5869, deriving multiple keys from the same PRK using
+             * distinct info strings is the standard and correct HKDF pattern.
+             */
             $ekey = Core::HKDF(
                 Core::HASH_FUNCTION_NAME,
                 $prekey,

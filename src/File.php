@@ -472,7 +472,7 @@ final class File
      *      Fixes erroneous errors caused by PHP 7.2 switching the return value
      *      of hash_init from a resource to a HashContext.
      */
-    public static function decryptResourceInternal($inputHandle, $outputHandle, KeyOrPassword $secret)
+    private static function decryptResourceInternal($inputHandle, $outputHandle, KeyOrPassword $secret)
     {
         if (! \is_resource($inputHandle)) {
             throw new Ex\IOException(

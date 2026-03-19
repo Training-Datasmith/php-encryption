@@ -185,6 +185,7 @@ final class Core
         /** @var string $orm */
         $orm = Core::ourSubstr($t, 0, $length);
         Core::ensureTrue(\is_string($orm));
+        Core::ensureTrue(Core::ourStrlen($orm) === $length, 'HKDF output length mismatch.');
         return $orm;
     }
 
