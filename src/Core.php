@@ -34,12 +34,24 @@ final class Core
     /**
      * Adds an integer to a block-sized counter.
      *
-     * @param string $ctr
-     * @param int    $inc
+     * Used to advance a CTR-mode nonce by $inc blocks without external BigInt
+     * dependencies.  Arithmetic is performed byte-by-byte in big-endian order,
+     * matching OpenSSL's CTR mode nonce increment order.
      *
-     * @throws Ex\EnvironmentIsBrokenException
+     * @complexity O(BLOCK_BYTE_SIZE) = O(16) — constant time in practice.
      *
-     * @return string
+     * @security The counter must never wrap around to a previously used value
+     *           for the same key.  Callers must ensure $inc > 0 and that the
+     *           total increment does not overflow the 128-bit counter space.
+     *
+     * @param string $ctr  A BLOCK_BYTE_SIZE (16) byte counter string (big-endian).
+     * @param int    $inc  The positive integer amount to add to the counter.
+     *                     Must be > 0 and ≤ PHP_INT_MAX - 255.
+     *
+     * @throws Ex\EnvironmentIsBrokenException if $ctr has wrong length, $inc is non-positive,
+     *                                         or integer overflow would occur
+     *
+     * @return string The incremented counter as a BLOCK_BYTE_SIZE byte string.
      *
      * @psalm-suppress RedundantCondition - It's valid to use is_int to check for overflow.
      */
@@ -64,13 +76,21 @@ final class Core
         return $ctr;
     }
     /**
-     * Returns a random byte string of the specified length.
+     * Returns a cryptographically secure random byte string of the specified length.
      *
-     * @param int $octets
+     * Delegates to PHP's random_bytes() which sources entropy from the OS
+     * CSPRNG (e.g., /dev/urandom on Linux, CryptGenRandom on Windows).
      *
-     * @throws Ex\EnvironmentIsBrokenException
+     * @security This function MUST NOT be replaced with a userland PRNG (mt_rand,
+     *           array_rand, etc.).  Doing so would produce predictable IVs, salts,
+     *           and keys, completely breaking the security of all derived material.
      *
-     * @return string
+     * @param int $octets  The number of random bytes to return; must be > 0.
+     *
+     * @throws Ex\Crypto_Exception               if $octets ≤ 0
+     * @throws Ex\Environment_Is_Broken_Exception if the OS CSPRNG is unavailable
+     *
+     * @return string A string of $octets random bytes.
      */
     public static function secure_random($octets)
     {
@@ -85,19 +105,32 @@ final class Core
         }
     }
     /**
-     * Computes the HKDF key derivation function specified in
-     * http://tools.ietf.org/html/rfc5869.
+     * Computes the HKDF key derivation function specified in RFC 5869.
      *
-     * @param string $hash   Hash Function
-     * @param string $ikm    Initial Keying Material
-     * @param int    $length How many bytes?
-     * @param string $info   What sort of key are we deriving?
-     * @param string $salt
+     * Uses the native hash_hkdf() when available (PHP 7.1.2+) and falls back
+     * to a pure-PHP implementation using HMAC-Hash.
      *
-     * @throws Ex\EnvironmentIsBrokenException
+     * @complexity O(ceil(length / digest_length)) HMAC invocations — constant for
+     *             fixed length values; typically 1–2 calls for KEY_BYTE_SIZE output.
+     *
+     * @security HKDF is a two-step function: Extract produces a pseudorandom key
+     *           (PRK) from the IKM and salt, then Expand derives output keying
+     *           material.  The info parameter provides domain separation — always
+     *           pass distinct info strings when deriving multiple keys from the
+     *           same IKM to prevent key-reuse attacks.
+     *
+     * @param string      $hash    Hash algorithm name (e.g., 'sha256').
+     * @param string      $ikm     Initial keying material (the root secret).
+     * @param int         $length  Desired output length in bytes (1 – 255 × digest_length).
+     * @param string      $info    Context-specific info string for domain separation.
+     * @param string|null $salt    Optional salt; if null, defaults to a string of zero bytes.
+     *
+     * @throws Ex\Environment_Is_Broken_Exception if $length is out of range or the
+     *                                             output length does not match
+     *
      * @psalm-suppress UndefinedFunction - We're checking if the function exists first.
      *
-     * @return string
+     * @return string $length bytes of output keying material.
      */
     public static function HKDF($hash, $ikm, $length, $info = '', $salt = null)
     {
@@ -145,12 +178,23 @@ final class Core
      * Checks if two equal-length strings are the same without leaking
      * information through side channels.
      *
-     * @param string $expected
-     * @param string $given
+     * When the native hash_equals() is available it is used directly.
+     * Otherwise both strings are HMACed with a random blinding key and the
+     * HMACs are compared with '===', making timing attacks infeasible even
+     * in interpreted PHP.
      *
-     * @throws Ex\EnvironmentIsBrokenException
+     * @security Both strings MUST have the same byte length before calling
+     *           this function.  Variable-length comparison is not covered by
+     *           this implementation; an EnvironmentIsBrokenException is thrown
+     *           if the lengths differ.  This function prevents the HMAC timing
+     *           side channel described in CVE-2013-4294 and similar advisories.
      *
-     * @return bool
+     * @param string $expected  The expected (correct) value, e.g. a computed HMAC.
+     * @param string $given     The value supplied by the caller to compare against.
+     *
+     * @throws Ex\Environment_Is_Broken_Exception if the two strings have different lengths
+     *
+     * @return bool True if and only if the strings are identical.
      */
     public static function hash_equals($expected, $given)
     {
@@ -298,22 +342,35 @@ final class Core
         return \substr($str, $start, $length);
     }
     /**
-     * Computes the PBKDF2 password-based key derivation function.
+     * Computes the PBKDF2 password-based key derivation function (RFC 2898).
      *
-     * The PBKDF2 function is defined in RFC 2898. Test vectors can be found in
-     * RFC 6070. This implementation of PBKDF2 was originally created by Taylor
-     * Hornby, with improvements from http://www.variations-of-shadow.com/.
+     * Uses the native hash_pbkdf2() when available (PHP 5.5+) and falls back to
+     * a pure-PHP HMAC-based implementation.  The algorithm is whitelisted to
+     * secure cryptographic hash functions; CRC32 and other non-cryptographic
+     * functions are rejected.
      *
-     * @param string $algorithm  The hash algorithm to use. Recommended: SHA256
-     * @param string $password   The password.
-     * @param string $salt       A salt that is unique to the password.
-     * @param int    $count      Iteration count. Higher is better, but slower. Recommended: At least 1000.
-     * @param int    $key_length The length of the derived key in bytes.
-     * @param bool   $raw_output If true, the key is returned in raw binary format. Hex encoded otherwise.
+     * @complexity O(count * key_length / digest_length) HMAC invocations.
+     *             With count = 100 000 and sha256, this is ~100 000 HMAC calls.
+     *             This is intentionally expensive to slow brute-force attacks.
      *
-     * @throws Ex\EnvironmentIsBrokenException
+     * @security The password is pre-hashed before being passed to PBKDF2 to
+     *           defend against the DoS attack described in GitHub issue #230
+     *           (passwords longer than the HMAC block size cause extra iterations).
+     *           The iteration count PBKDF2_ITERATIONS = 100 000 follows NIST SP
+     *           800-132 recommendations; do not reduce it.
      *
-     * @return string A $key_length-byte key derived from the password and salt.
+     * @param string $algorithm  Hash algorithm name; must be in the approved list (e.g., 'sha256').
+     * @param string $password   The password (or pre-hashed password) to derive from.
+     * @param string $salt       A random, per-password salt (at least 8 bytes recommended by RFC 2898).
+     * @param int    $count      Iteration count; must be > 0.  Higher = slower brute-force.
+     * @param int    $key_length Desired output key length in bytes.
+     * @param bool   $raw_output When true, returns raw binary; otherwise returns hex string.
+     *
+     * @throws Ex\Environment_Is_Broken_Exception if the algorithm is not approved or parameters are invalid
+     *
+     * @return string A derived key of $key_length bytes.
+     *
+     * @see https://tools.ietf.org/html/rfc2898
      */
     public static function pbkdf2(
         $algorithm,

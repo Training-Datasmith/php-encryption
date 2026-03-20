@@ -18,41 +18,51 @@ final class Key_Or_Password
      */
     private $secret;
     /**
-     * Initializes an instance of KeyOrPassword from a key.
+     * Initializes an instance of Key_Or_Password from a Key object.
      *
+     * @param Key $key  A Key loaded via Key::create_new_random_key() or Key::load_from_ascii_safe_string().
      *
-     * @return KeyOrPassword
+     * @return self
      */
-    public static function create_from_key(Key $key)
+    public static function create_from_key(Key $key): self
     {
         return new Key_Or_Password(self::SECRET_TYPE_KEY, $key);
     }
     /**
-     * Initializes an instance of KeyOrPassword from a password.
+     * Initializes an instance of Key_Or_Password from a password string.
      *
-     * @param string $password
+     * @param string $password  The human-chosen password; must be a non-empty string.
      *
-     * @return KeyOrPassword
+     * @return self
      */
     public static function create_from_password(
         #[\Sensitive_Parameter]
-        $password
-    )
-    {
+        string $password
+    ): self {
         return new Key_Or_Password(self::SECRET_TYPE_PASSWORD, $password);
     }
     /**
-     * Derives authentication and encryption keys from the secret, using a slow
-     * key derivation function if the secret is a password.
+     * Derives authentication and encryption sub-keys from the secret.
      *
-     * @param string $salt
+     * If the secret is a Key, HKDF-SHA256 is applied directly to the raw key bytes.
+     * If the secret is a password, PBKDF2-SHA256 (100 000 iterations) is applied
+     * first to produce a pseudo-random key, then HKDF derives the sub-keys.
+     * The HKDF info strings ('DefusePHP|V2|KeyForEncryption' and
+     * 'DefusePHP|V2|KeyForAuthentication') provide cryptographic domain separation.
      *
-     * @throws Ex\CryptoException
-     * @throws Ex\EnvironmentIsBrokenException
+     * @security Both sub-keys are derived from the same root secret but using
+     *           distinct HKDF info strings.  This is the standard RFC 5869 pattern
+     *           for deriving multiple independent keys from one source.
      *
-     * @return DerivedKeys
+     * @param string $salt  A SALT_BYTE_SIZE (32) byte random salt, freshly generated
+     *                      per encryption operation and stored in the ciphertext.
+     *
+     * @throws Ex\Crypto_Exception              if the salt has the wrong length
+     * @throws Ex\Environment_Is_Broken_Exception if internal assertion fails
+     *
+     * @return Derived_Keys The two derived sub-keys.
      */
-    public function derive_keys($salt)
+    public function derive_keys(string $salt): Derived_Keys
     {
         Core::ensure_true(Core::our_strlen($salt) === Core::SALT_BYTE_SIZE, 'Bad salt.');
         if ($this->secret_type === self::SECRET_TYPE_KEY) {

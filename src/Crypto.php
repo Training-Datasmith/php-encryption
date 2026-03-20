@@ -9,14 +9,30 @@ class Crypto
     /**
      * Encrypts a string with a Key.
      *
-     * @param string $plaintext
-     * @param Key    $key
-     * @param bool   $raw_binary
+     * Produces an authenticated ciphertext using AES-256-CTR for encryption
+     * and HMAC-SHA256 for integrity (Encrypt-then-MAC).  A fresh random salt
+     * and IV are generated on every call, so encrypting the same plaintext
+     * twice with the same key produces different ciphertexts.
      *
-     * @throws Ex\EnvironmentIsBrokenException
-     * @throws \TypeError
+     * @security Uses HKDF to derive independent encryption and authentication
+     *           sub-keys from the root Key, preventing key-reuse vulnerabilities.
+     *           The HMAC covers VERSION || SALT || IV || CIPHERTEXT so any
+     *           tampering is detected before decryption begins.
      *
-     * @return string
+     * @param string $plaintext  The plaintext string to encrypt; may be empty.
+     * @param Key    $key        A Key object created by Key::create_new_random_key()
+     *                           or loaded from storage via Key::load_from_ascii_safe_string().
+     * @param bool   $raw_binary When true, returns raw binary ciphertext; otherwise
+     *                           returns a hex-encoded string safe for text storage.
+     *
+     * @throws Ex\EnvironmentIsBrokenException if the runtime crypto environment is broken
+     * @throws \TypeError if $plaintext is not a string, $key is not a Key, or $raw_binary is not a bool
+     *
+     * @return string Authenticated ciphertext (hex-encoded unless $raw_binary is true).
+     *
+     * @since 2.0.0
+     * @see self::decrypt()
+     * @see Key::create_new_random_key()
      */
     public static function encrypt($plaintext, $key, $raw_binary = false)
     {
@@ -35,14 +51,26 @@ class Crypto
      * Encrypts a string with a password, using a slow key derivation function
      * to make password cracking more expensive.
      *
-     * @param string $plaintext
-     * @param string $password
-     * @param bool   $raw_binary
+     * Internally derives a Key from the password using PBKDF2-SHA256 with a
+     * random 32-byte salt, then delegates to the standard encrypt path.
      *
-     * @throws Ex\EnvironmentIsBrokenException
-     * @throws \TypeError
+     * @security The password is annotated with #[SensitiveParameter] so it is
+     *           redacted from PHP stack traces.  PBKDF2 iteration count is chosen
+     *           to impose computational cost on brute-force attempts; prefer
+     *           key-based encryption for high-value secrets.
      *
-     * @return string
+     * @param string $plaintext  The plaintext string to encrypt.
+     * @param string $password   A secret password used to derive the encryption key.
+     *                           Must be non-empty; longer and more random is better.
+     * @param bool   $raw_binary When true, returns raw binary ciphertext.
+     *
+     * @throws Ex\EnvironmentIsBrokenException if the runtime crypto environment is broken
+     * @throws \TypeError if any argument has the wrong type
+     *
+     * @return string Authenticated ciphertext (hex-encoded unless $raw_binary is true).
+     *
+     * @since 2.0.0
+     * @see self::decrypt_with_password()
      */
     public static function encrypt_with_password(
         $plaintext,
@@ -65,15 +93,30 @@ class Crypto
     /**
      * Decrypts a ciphertext to a string with a Key.
      *
-     * @param string $ciphertext
-     * @param Key    $key
-     * @param bool   $raw_binary
+     * Verifies the HMAC-SHA256 authentication tag before performing any
+     * decryption.  If the tag does not match — due to a wrong key, truncation,
+     * or any modification of the ciphertext — a
+     * Wrong_Key_Or_Modified_Ciphertext_Exception is thrown and no decryption
+     * output is produced.
      *
-     * @throws \TypeError
-     * @throws Ex\EnvironmentIsBrokenException
-     * @throws Ex\WrongKeyOrModifiedCiphertextException
+     * @security HMAC verification uses Core::hash_equals() for constant-time
+     *           comparison, preventing timing side-channel leakage of the correct
+     *           HMAC value.  Decrypt-after-verify (Encrypt-then-MAC) prevents
+     *           chosen-ciphertext attacks such as padding oracles.
      *
-     * @return string
+     * @param string $ciphertext  The authenticated ciphertext produced by encrypt().
+     * @param Key    $key         The same Key used to encrypt the ciphertext.
+     * @param bool   $raw_binary  Must match the $raw_binary flag used during encryption.
+     *
+     * @throws \TypeError                                      if argument types are wrong
+     * @throws Ex\EnvironmentIsBrokenException                 if the runtime environment is broken
+     * @throws Ex\Wrong_Key_Or_Modified_Ciphertext_Exception   if the key is wrong or the
+     *                                                         ciphertext has been altered
+     *
+     * @return string The original plaintext.
+     *
+     * @since 2.0.0
+     * @see self::encrypt()
      */
     public static function decrypt($ciphertext, $key, $raw_binary = false)
     {
@@ -92,15 +135,27 @@ class Crypto
      * Decrypts a ciphertext to a string with a password, using a slow key
      * derivation function to make password cracking more expensive.
      *
-     * @param string $ciphertext
-     * @param string $password
-     * @param bool   $raw_binary
+     * Derives the same Key that was produced during encryption from the password
+     * and the random salt embedded in the ciphertext, then verifies the HMAC
+     * before decrypting.
      *
-     * @throws Ex\EnvironmentIsBrokenException
-     * @throws Ex\WrongKeyOrModifiedCiphertextException
-     * @throws \TypeError
+     * @security The password is annotated with #[SensitiveParameter].  A wrong
+     *           password and a tampered ciphertext both throw the same exception
+     *           with an identical message to prevent oracle attacks.
      *
-     * @return string
+     * @param string $ciphertext  The authenticated ciphertext produced by encrypt_with_password().
+     * @param string $password    The same password used to encrypt the ciphertext.
+     * @param bool   $raw_binary  Must match the $raw_binary flag used during encryption.
+     *
+     * @throws Ex\EnvironmentIsBrokenException                 if the runtime environment is broken
+     * @throws Ex\Wrong_Key_Or_Modified_Ciphertext_Exception   if the password is wrong or
+     *                                                         the ciphertext has been altered
+     * @throws \TypeError if argument types are wrong
+     *
+     * @return string The original plaintext.
+     *
+     * @since 2.0.0
+     * @see self::encrypt_with_password()
      */
     public static function decrypt_with_password(
         $ciphertext,
@@ -123,14 +178,30 @@ class Crypto
     /**
      * Decrypts a legacy ciphertext produced by version 1 of this library.
      *
-     * @param string $ciphertext
-     * @param string $key
+     * Supports the V1 format: HMAC (32 bytes) || IV (16 bytes) || CIPHERTEXT.
+     * V1 used AES-128-CBC rather than AES-256-CTR.  New code should not produce
+     * V1 ciphertexts; this method exists solely for migration purposes.
      *
-     * @throws Ex\EnvironmentIsBrokenException
-     * @throws Ex\WrongKeyOrModifiedCiphertextException
-     * @throws \TypeError
+     * @deprecated since 2.0.0 — Migrate V1 ciphertexts by decrypting with
+     *             legacy_decrypt() and re-encrypting with encrypt().  This method
+     *             will be removed in a future major version.
      *
-     * @return string
+     * @security The raw key argument is a plain string (V1 did not use the
+     *           Key class).  The #[SensitiveParameter] attribute ensures it is
+     *           redacted from stack traces.  The HMAC is verified before decryption
+     *           to prevent chosen-ciphertext attacks even against the legacy format.
+     *
+     * @param string $ciphertext  A ciphertext produced by the version 1 library.
+     * @param string $key         The raw binary key string used with the V1 library.
+     *
+     * @throws Ex\EnvironmentIsBrokenException                if the runtime environment is broken
+     * @throws Ex\Wrong_Key_Or_Modified_Ciphertext_Exception  if the key is wrong or the
+     *                                                        ciphertext has been altered
+     * @throws \TypeError if argument types are wrong
+     *
+     * @return string The original plaintext.
+     *
+     * @since 1.0.0
      */
     public static function legacy_decrypt(
         $ciphertext,
@@ -144,6 +215,10 @@ class Crypto
         if (!\is_string($key)) {
             throw new \TypeError('String expected for argument 2. ' . \ucfirst(\gettype($key)) . ' given instead.');
         }
+        trigger_error(
+            'Crypto::legacy_decrypt() is deprecated since 2.0.0. Decrypt V1 ciphertexts and re-encrypt with Crypto::encrypt().',
+            \E_USER_DEPRECATED
+        );
         Runtime_Tests::runtime_test();
         // Extract the HMAC from the front of the ciphertext.
         if (Core::our_strlen($ciphertext) <= Core::LEGACY_MAC_BYTE_SIZE) {
