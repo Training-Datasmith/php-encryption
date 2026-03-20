@@ -1,9 +1,8 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Defuse\Crypto\Exception;
 
-class WrongKeyOrModifiedCiphertextException extends \Defuse\Crypto\Exception\CryptoException
+class Wrong_Key_Or_Modified_Ciphertext_Exception extends \Defuse\Crypto\Exception\Crypto_Exception
 {
 }

@@ -1,21 +1,17 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Defuse\Crypto;
 
 use Defuse\Crypto\Exception as Ex;
-
 final class Key
 {
-    public const KEY_CURRENT_VERSION = "\xDE\xF0\x00\x00";
-    public const KEY_BYTE_SIZE       = 32;
-
+    public const KEY_CURRENT_VERSION = "\xde\xf0\x00\x00";
+    public const KEY_BYTE_SIZE = 32;
     /**
      * @var string
      */
     private $key_bytes;
-
     /**
      * Creates new random key.
      *
@@ -23,11 +19,10 @@ final class Key
      *
      * @return Key
      */
-    public static function createNewRandomKey()
+    public static function create_new_random_key()
     {
-        return new Key(Core::secureRandom(self::KEY_BYTE_SIZE));
+        return new Key(Core::secure_random(self::KEY_BYTE_SIZE));
     }
-
     /**
      * Loads a Key from its encoded form.
      *
@@ -43,18 +38,18 @@ final class Key
      *
      * @return Key
      */
-    public static function loadFromAsciiSafeString(
-        #[\SensitiveParameter]
+    public static function load_from_ascii_safe_string(
+        #[\Sensitive_Parameter]
         $saved_key_string,
         $do_not_trim = false
-    ) {
+    )
+    {
         if (!$do_not_trim) {
-            $saved_key_string = Encoding::trimTrailingWhitespace($saved_key_string);
+            $saved_key_string = Encoding::trim_trailing_whitespace($saved_key_string);
         }
-        $key_bytes = Encoding::loadBytesFromChecksummedAsciiSafeString(self::KEY_CURRENT_VERSION, $saved_key_string);
+        $key_bytes = Encoding::load_bytes_from_checksummed_ascii_safe_string(self::KEY_CURRENT_VERSION, $saved_key_string);
         return new Key($key_bytes);
     }
-
     /**
      * Encodes the Key into a string of printable ASCII characters.
      *
@@ -62,24 +57,19 @@ final class Key
      *
      * @return string
      */
-    public function saveToAsciiSafeString()
+    public function save_to_ascii_safe_string()
     {
-        return Encoding::saveBytesToChecksummedAsciiSafeString(
-            self::KEY_CURRENT_VERSION,
-            $this->key_bytes
-        );
+        return Encoding::save_bytes_to_checksummed_ascii_safe_string(self::KEY_CURRENT_VERSION, $this->key_bytes);
     }
-
     /**
      * Gets the raw bytes of the key.
      *
      * @return string
      */
-    public function getRawBytes()
+    public function get_raw_bytes()
     {
         return $this->key_bytes;
     }
-
     /**
      * Constructs a new Key object from a string of raw bytes.
      *
@@ -88,14 +78,11 @@ final class Key
      * @throws Ex\EnvironmentIsBrokenException
      */
     private function __construct(
-        #[\SensitiveParameter]
+        #[\Sensitive_Parameter]
         $bytes
-    ) {
-        Core::ensureTrue(
-            Core::ourStrlen($bytes) === self::KEY_BYTE_SIZE,
-            'Bad key length.'
-        );
+    )
+    {
+        Core::ensure_true(Core::our_strlen($bytes) === self::KEY_BYTE_SIZE, 'Bad key length.');
         $this->key_bytes = $bytes;
     }
-
 }

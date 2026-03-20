@@ -1,17 +1,14 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Defuse\Crypto;
 
 use Defuse\Crypto\Exception as Ex;
-
 final class Encoding
 {
-    public const CHECKSUM_BYTE_SIZE     = 32;
-    public const CHECKSUM_HASH_ALGO     = 'sha256';
+    public const CHECKSUM_BYTE_SIZE = 32;
+    public const CHECKSUM_HASH_ALGO = 'sha256';
     public const SERIALIZE_HEADER_BYTES = 4;
-
     /**
      * Converts a byte string to a hexadecimal string without leaking
      * information through side channels.
@@ -22,22 +19,17 @@ final class Encoding
      *
      * @return string
      */
-    public static function binToHex($byte_string)
+    public static function bin_to_hex($byte_string)
     {
         $hex = '';
-        $len = Core::ourStrlen($byte_string);
+        $len = Core::our_strlen($byte_string);
         for ($i = 0; $i < $len; ++$i) {
             $c = \ord($byte_string[$i]) & 0xf;
             $b = \ord($byte_string[$i]) >> 4;
-            $hex .= \pack(
-                'CC',
-                87 + $b + ((($b - 10) >> 8) & ~38),
-                87 + $c + ((($c - 10) >> 8) & ~38)
-            );
+            $hex .= \pack('CC', 87 + $b + ($b - 10 >> 8 & ~38), 87 + $c + ($c - 10 >> 8 & ~38));
         }
         return $hex;
     }
-
     /**
      * Converts a hexadecimal string into a byte string without leaking
      * information through side channels.
@@ -50,26 +42,23 @@ final class Encoding
      * @return string
      * @psalm-suppress TypeDoesNotContainType
      */
-    public static function hexToBin($hex_string)
+    public static function hex_to_bin($hex_string)
     {
         $hex_pos = 0;
-        $bin     = '';
-        $hex_len = Core::ourStrlen($hex_string);
-        $state   = 0;
-        $c_acc   = 0;
-
+        $bin = '';
+        $hex_len = Core::our_strlen($hex_string);
+        $state = 0;
+        $c_acc = 0;
         while ($hex_pos < $hex_len) {
-            $c        = \ord($hex_string[$hex_pos]);
-            $c_num    = $c ^ 48;
-            $c_num0   = ($c_num - 10) >> 8;
-            $c_alpha  = ($c & ~32) - 55;
-            $c_alpha0 = (($c_alpha - 10) ^ ($c_alpha - 16)) >> 8;
+            $c = \ord($hex_string[$hex_pos]);
+            $c_num = $c ^ 48;
+            $c_num0 = $c_num - 10 >> 8;
+            $c_alpha = ($c & ~32) - 55;
+            $c_alpha0 = ($c_alpha - 10 ^ $c_alpha - 16) >> 8;
             if (($c_num0 | $c_alpha0) === 0) {
-                throw new Ex\BadFormatException(
-                    'Encoding::hexToBin() input is not a hex string.'
-                );
+                throw new Ex\Bad_Format_Exception('Encoding::hexToBin() input is not a hex string.');
             }
-            $c_val = ($c_num0 & $c_num) | ($c_alpha & $c_alpha0);
+            $c_val = $c_num0 & $c_num | $c_alpha & $c_alpha0;
             if ($state === 0) {
                 $c_acc = $c_val * 16;
             } else {
@@ -80,7 +69,6 @@ final class Encoding
         }
         return $bin;
     }
-
     /**
      * Remove trialing whitespace without table look-ups or branches.
      *
@@ -90,53 +78,47 @@ final class Encoding
      * @param string $string
      * @return string
      */
-    public static function trimTrailingWhitespace($string = '')
+    public static function trim_trailing_whitespace($string = '')
     {
-        $length = Core::ourStrlen($string);
+        $length = Core::our_strlen($string);
         if ($length < 1) {
             return '';
         }
         do {
-            $prevLength = $length;
+            $prev_length = $length;
             $last = $length - 1;
             $chr = \ord($string[$last]);
-
             /* Null Byte (0x00), a.k.a. \0 */
             // if ($chr === 0x00) $length -= 1;
-            $sub = (($chr - 1) >> 8) & 1;
+            $sub = $chr - 1 >> 8 & 1;
             $length -= $sub;
             $last -= $sub;
-
             /* Horizontal Tab (0x09) a.k.a. \t */
             $chr = \ord($string[$last]);
             // if ($chr === 0x09) $length -= 1;
-            $sub = (((0x08 - $chr) & ($chr - 0x0a)) >> 8) & 1;
+            $sub = (0x8 - $chr & $chr - 0xa) >> 8 & 1;
             $length -= $sub;
             $last -= $sub;
-
             /* New Line (0x0a), a.k.a. \n */
             $chr = \ord($string[$last]);
             // if ($chr === 0x0a) $length -= 1;
-            $sub = (((0x09 - $chr) & ($chr - 0x0b)) >> 8) & 1;
+            $sub = (0x9 - $chr & $chr - 0xb) >> 8 & 1;
             $length -= $sub;
             $last -= $sub;
-
             /* Carriage Return (0x0D), a.k.a. \r */
             $chr = \ord($string[$last]);
             // if ($chr === 0x0d) $length -= 1;
-            $sub = (((0x0c - $chr) & ($chr - 0x0e)) >> 8) & 1;
+            $sub = (0xc - $chr & $chr - 0xe) >> 8 & 1;
             $length -= $sub;
             $last -= $sub;
-
             /* Space */
             $chr = \ord($string[$last]);
             // if ($chr === 0x20) $length -= 1;
-            $sub = (((0x1f - $chr) & ($chr - 0x21)) >> 8) & 1;
+            $sub = (0x1f - $chr & $chr - 0x21) >> 8 & 1;
             $length -= $sub;
-        } while ($prevLength !== $length && $length > 0);
-        return (string) Core::ourSubstr($string, 0, $length);
+        } while ($prev_length !== $length && $length > 0);
+        return (string) Core::our_substr($string, 0, $length);
     }
-
     /*
      * SECURITY NOTE ON APPLYING CHECKSUMS TO SECRETS:
      *
@@ -165,7 +147,6 @@ final class Encoding
      *      Because the scenario assumes a serious vulnerability, we don't try
      *      to prevent attacks of this style.
      */
-
     /**
      * INTERNAL USE ONLY: Applies a version header, applies a checksum, and
      * then encodes a byte string into a range of printable ASCII characters.
@@ -177,29 +158,17 @@ final class Encoding
      *
      * @return string
      */
-    public static function saveBytesToChecksummedAsciiSafeString(
+    public static function save_bytes_to_checksummed_ascii_safe_string(
         $header,
-        #[\SensitiveParameter]
+        #[\Sensitive_Parameter]
         $bytes
-    ) {
+    )
+    {
         // Headers must be a constant length to prevent one type's header from
         // being a prefix of another type's header, leading to ambiguity.
-        Core::ensureTrue(
-            Core::ourStrlen($header) === self::SERIALIZE_HEADER_BYTES,
-            'Header must be ' . self::SERIALIZE_HEADER_BYTES . ' bytes.'
-        );
-
-        return Encoding::binToHex(
-            $header .
-            $bytes .
-            \hash(
-                self::CHECKSUM_HASH_ALGO,
-                $header . $bytes,
-                true
-            )
-        );
+        Core::ensure_true(Core::our_strlen($header) === self::SERIALIZE_HEADER_BYTES, 'Header must be ' . self::SERIALIZE_HEADER_BYTES . ' bytes.');
+        return Encoding::bin_to_hex($header . $bytes . \hash(self::CHECKSUM_HASH_ALGO, $header . $bytes, true));
     }
-
     /**
      * INTERNAL USE ONLY: Decodes, verifies the header and checksum, and returns
      * the encoded byte string.
@@ -212,66 +181,37 @@ final class Encoding
      *
      * @return string
      */
-    public static function loadBytesFromChecksummedAsciiSafeString(
+    public static function load_bytes_from_checksummed_ascii_safe_string(
         $expected_header,
-        #[\SensitiveParameter]
+        #[\Sensitive_Parameter]
         $string
-    ) {
+    )
+    {
         // Headers must be a constant length to prevent one type's header from
         // being a prefix of another type's header, leading to ambiguity.
-        Core::ensureTrue(
-            Core::ourStrlen($expected_header) === self::SERIALIZE_HEADER_BYTES,
-            'Header must be 4 bytes.'
-        );
-
+        Core::ensure_true(Core::our_strlen($expected_header) === self::SERIALIZE_HEADER_BYTES, 'Header must be 4 bytes.');
         /* If you get an exception here when attempting to load from a file, first pass your
            key to Encoding::trimTrailingWhitespace() to remove newline characters, etc.      */
-        $bytes = Encoding::hexToBin($string);
-
+        $bytes = Encoding::hex_to_bin($string);
         /* Make sure we have enough bytes to get the version header and checksum. */
-        if (Core::ourStrlen($bytes) < self::SERIALIZE_HEADER_BYTES + self::CHECKSUM_BYTE_SIZE) {
-            throw new Ex\BadFormatException(
-                'Encoded data is shorter than expected.'
-            );
+        if (Core::our_strlen($bytes) < self::SERIALIZE_HEADER_BYTES + self::CHECKSUM_BYTE_SIZE) {
+            throw new Ex\Bad_Format_Exception('Encoded data is shorter than expected.');
         }
-
         /* Grab the version header. */
-        $actual_header = (string) Core::ourSubstr($bytes, 0, self::SERIALIZE_HEADER_BYTES);
-
+        $actual_header = (string) Core::our_substr($bytes, 0, self::SERIALIZE_HEADER_BYTES);
         if ($actual_header !== $expected_header) {
-            throw new Ex\BadFormatException(
-                'Invalid header.'
-            );
+            throw new Ex\Bad_Format_Exception('Invalid header.');
         }
-
         /* Grab the bytes that are part of the checksum. */
-        $checked_bytes = (string) Core::ourSubstr(
-            $bytes,
-            0,
-            Core::ourStrlen($bytes) - self::CHECKSUM_BYTE_SIZE
-        );
-
+        $checked_bytes = (string) Core::our_substr($bytes, 0, Core::our_strlen($bytes) - self::CHECKSUM_BYTE_SIZE);
         /* Grab the included checksum. */
-        $checksum_a = (string) Core::ourSubstr(
-            $bytes,
-            Core::ourStrlen($bytes) - self::CHECKSUM_BYTE_SIZE,
-            self::CHECKSUM_BYTE_SIZE
-        );
-
+        $checksum_a = (string) Core::our_substr($bytes, Core::our_strlen($bytes) - self::CHECKSUM_BYTE_SIZE, self::CHECKSUM_BYTE_SIZE);
         /* Re-compute the checksum. */
         $checksum_b = \hash(self::CHECKSUM_HASH_ALGO, $checked_bytes, true);
-
         /* Check if the checksum matches. */
-        if (! Core::hashEquals($checksum_a, $checksum_b)) {
-            throw new Ex\BadFormatException(
-                "Data is corrupted, the checksum doesn't match"
-            );
+        if (!Core::hash_equals($checksum_a, $checksum_b)) {
+            throw new Ex\Bad_Format_Exception("Data is corrupted, the checksum doesn't match");
         }
-
-        return (string) Core::ourSubstr(
-            $bytes,
-            self::SERIALIZE_HEADER_BYTES,
-            Core::ourStrlen($bytes) - self::SERIALIZE_HEADER_BYTES - self::CHECKSUM_BYTE_SIZE
-        );
+        return (string) Core::our_substr($bytes, self::SERIALIZE_HEADER_BYTES, Core::our_strlen($bytes) - self::SERIALIZE_HEADER_BYTES - self::CHECKSUM_BYTE_SIZE);
     }
 }

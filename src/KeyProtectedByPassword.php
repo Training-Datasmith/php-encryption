@@ -1,20 +1,16 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Defuse\Crypto;
 
 use Defuse\Crypto\Exception as Ex;
-
-final class KeyProtectedByPassword
+final class Key_Protected_By_Password
 {
-    public const PASSWORD_KEY_CURRENT_VERSION = "\xDE\xF1\x00\x00";
-
+    public const PASSWORD_KEY_CURRENT_VERSION = "\xde\xf1\x00\x00";
     /**
      * @var string
      */
     private $encrypted_key = '';
-
     /**
      * Creates a random key protected by the provided password.
      *
@@ -24,24 +20,19 @@ final class KeyProtectedByPassword
      *
      * @return KeyProtectedByPassword
      */
-    public static function createRandomPasswordProtectedKey(
-        #[\SensitiveParameter]
+    public static function create_random_password_protected_key(
+        #[\Sensitive_Parameter]
         $password
-    ) {
-        $inner_key = Key::createNewRandomKey();
+    )
+    {
+        $inner_key = Key::create_new_random_key();
         /* The password is hashed as a form of poor-man's domain separation
          * between this use of encryptWithPassword() and other uses of
          * encryptWithPassword() that the user may also be using as part of the
          * same protocol. */
-        $encrypted_key = Crypto::encryptWithPassword(
-            $inner_key->saveToAsciiSafeString(),
-            \hash(Core::HASH_FUNCTION_NAME, $password, true),
-            true
-        );
-
-        return new KeyProtectedByPassword($encrypted_key);
+        $encrypted_key = Crypto::encrypt_with_password($inner_key->save_to_ascii_safe_string(), \hash(Core::HASH_FUNCTION_NAME, $password, true), true);
+        return new Key_Protected_By_Password($encrypted_key);
     }
-
     /**
      * Loads a KeyProtectedByPassword from its encoded form.
      *
@@ -51,17 +42,14 @@ final class KeyProtectedByPassword
      *
      * @return KeyProtectedByPassword
      */
-    public static function loadFromAsciiSafeString(
-        #[\SensitiveParameter]
+    public static function load_from_ascii_safe_string(
+        #[\Sensitive_Parameter]
         $saved_key_string
-    ) {
-        $encrypted_key = Encoding::loadBytesFromChecksummedAsciiSafeString(
-            self::PASSWORD_KEY_CURRENT_VERSION,
-            $saved_key_string
-        );
-        return new KeyProtectedByPassword($encrypted_key);
+    )
+    {
+        $encrypted_key = Encoding::load_bytes_from_checksummed_ascii_safe_string(self::PASSWORD_KEY_CURRENT_VERSION, $saved_key_string);
+        return new Key_Protected_By_Password($encrypted_key);
     }
-
     /**
      * Encodes the KeyProtectedByPassword into a string of printable ASCII
      * characters.
@@ -70,14 +58,10 @@ final class KeyProtectedByPassword
      *
      * @return string
      */
-    public function saveToAsciiSafeString()
+    public function save_to_ascii_safe_string()
     {
-        return Encoding::saveBytesToChecksummedAsciiSafeString(
-            self::PASSWORD_KEY_CURRENT_VERSION,
-            $this->encrypted_key
-        );
+        return Encoding::save_bytes_to_checksummed_ascii_safe_string(self::PASSWORD_KEY_CURRENT_VERSION, $this->encrypted_key);
     }
-
     /**
      * Decrypts the protected key, returning an unprotected Key object that can
      * be used for encryption and decryption.
@@ -88,30 +72,23 @@ final class KeyProtectedByPassword
      * @param string $password
      * @return Key
      */
-    public function unlockKey(
-        #[\SensitiveParameter]
+    public function unlock_key(
+        #[\Sensitive_Parameter]
         $password
-    ) {
+    )
+    {
         try {
-            $inner_key_encoded = Crypto::decryptWithPassword(
-                $this->encrypted_key,
-                \hash(Core::HASH_FUNCTION_NAME, $password, true),
-                true
-            );
-            return Key::loadFromAsciiSafeString($inner_key_encoded);
-        } catch (Ex\BadFormatException $ex) {
+            $inner_key_encoded = Crypto::decrypt_with_password($this->encrypted_key, \hash(Core::HASH_FUNCTION_NAME, $password, true), true);
+            return Key::load_from_ascii_safe_string($inner_key_encoded);
+        } catch (Ex\Bad_Format_Exception $ex) {
             /* This should never happen unless an attacker replaced the
              * encrypted key ciphertext with some other ciphertext that was
              * encrypted with the same password. We transform the exception type
              * here in order to make the API simpler, avoiding the need to
              * document that this method might throw an Ex\BadFormatException. */
-            throw new Ex\WrongKeyOrModifiedCiphertextException(
-                'The decrypted key was found to be in an invalid format. ' .
-                'This very likely indicates it was modified by an attacker.'
-            );
+            throw new Ex\Wrong_Key_Or_Modified_Ciphertext_Exception('The decrypted key was found to be in an invalid format. ' . 'This very likely indicates it was modified by an attacker.');
         }
     }
-
     /**
      * Changes the password.
      *
@@ -123,28 +100,22 @@ final class KeyProtectedByPassword
      *
      * @return KeyProtectedByPassword
      */
-    public function changePassword(
-        #[\SensitiveParameter]
+    public function change_password(
+        #[\Sensitive_Parameter]
         $current_password,
-        #[\SensitiveParameter]
+        #[\Sensitive_Parameter]
         $new_password
-    ) {
-        $inner_key = $this->unlockKey($current_password);
+    )
+    {
+        $inner_key = $this->unlock_key($current_password);
         /* The password is hashed as a form of poor-man's domain separation
          * between this use of encryptWithPassword() and other uses of
          * encryptWithPassword() that the user may also be using as part of the
          * same protocol. */
-        $encrypted_key = Crypto::encryptWithPassword(
-            $inner_key->saveToAsciiSafeString(),
-            \hash(Core::HASH_FUNCTION_NAME, $new_password, true),
-            true
-        );
-
+        $encrypted_key = Crypto::encrypt_with_password($inner_key->save_to_ascii_safe_string(), \hash(Core::HASH_FUNCTION_NAME, $new_password, true), true);
         $this->encrypted_key = $encrypted_key;
-
         return $this;
     }
-
     /**
      * Constructor for KeyProtectedByPassword.
      *

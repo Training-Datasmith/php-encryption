@@ -1,11 +1,9 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Defuse\Crypto;
 
 use Defuse\Crypto\Exception as Ex;
-
 class Crypto
 {
     /**
@@ -23,27 +21,16 @@ class Crypto
     public static function encrypt($plaintext, $key, $raw_binary = false)
     {
         if (!\is_string($plaintext)) {
-            throw new \TypeError(
-                'String expected for argument 1. ' . \ucfirst(\gettype($plaintext)) . ' given instead.'
-            );
+            throw new \TypeError('String expected for argument 1. ' . \ucfirst(\gettype($plaintext)) . ' given instead.');
         }
-        if (!($key instanceof Key)) {
-            throw new \TypeError(
-                'Key expected for argument 2. ' . \ucfirst(\gettype($key)) . ' given instead.'
-            );
+        if (!$key instanceof Key) {
+            throw new \TypeError('Key expected for argument 2. ' . \ucfirst(\gettype($key)) . ' given instead.');
         }
         if (!\is_bool($raw_binary)) {
-            throw new \TypeError(
-                'Boolean expected for argument 3. ' . \ucfirst(\gettype($raw_binary)) . ' given instead.'
-            );
+            throw new \TypeError('Boolean expected for argument 3. ' . \ucfirst(\gettype($raw_binary)) . ' given instead.');
         }
-        return self::encryptInternal(
-            $plaintext,
-            KeyOrPassword::createFromKey($key),
-            $raw_binary
-        );
+        return self::encrypt_internal($plaintext, Key_Or_Password::create_from_key($key), $raw_binary);
     }
-
     /**
      * Encrypts a string with a password, using a slow key derivation function
      * to make password cracking more expensive.
@@ -57,34 +44,24 @@ class Crypto
      *
      * @return string
      */
-    public static function encryptWithPassword(
+    public static function encrypt_with_password(
         $plaintext,
-        #[\SensitiveParameter]
+        #[\Sensitive_Parameter]
         $password,
         $raw_binary = false
-    ) {
+    )
+    {
         if (!\is_string($plaintext)) {
-            throw new \TypeError(
-                'String expected for argument 1. ' . \ucfirst(\gettype($plaintext)) . ' given instead.'
-            );
+            throw new \TypeError('String expected for argument 1. ' . \ucfirst(\gettype($plaintext)) . ' given instead.');
         }
         if (!\is_string($password)) {
-            throw new \TypeError(
-                'String expected for argument 2. ' . \ucfirst(\gettype($password)) . ' given instead.'
-            );
+            throw new \TypeError('String expected for argument 2. ' . \ucfirst(\gettype($password)) . ' given instead.');
         }
         if (!\is_bool($raw_binary)) {
-            throw new \TypeError(
-                'Boolean expected for argument 3. ' . \ucfirst(\gettype($raw_binary)) . ' given instead.'
-            );
+            throw new \TypeError('Boolean expected for argument 3. ' . \ucfirst(\gettype($raw_binary)) . ' given instead.');
         }
-        return self::encryptInternal(
-            $plaintext,
-            KeyOrPassword::createFromPassword($password),
-            $raw_binary
-        );
+        return self::encrypt_internal($plaintext, Key_Or_Password::create_from_password($password), $raw_binary);
     }
-
     /**
      * Decrypts a ciphertext to a string with a Key.
      *
@@ -101,27 +78,16 @@ class Crypto
     public static function decrypt($ciphertext, $key, $raw_binary = false)
     {
         if (!\is_string($ciphertext)) {
-            throw new \TypeError(
-                'String expected for argument 1. ' . \ucfirst(\gettype($ciphertext)) . ' given instead.'
-            );
+            throw new \TypeError('String expected for argument 1. ' . \ucfirst(\gettype($ciphertext)) . ' given instead.');
         }
-        if (!($key instanceof Key)) {
-            throw new \TypeError(
-                'Key expected for argument 2. ' . \ucfirst(\gettype($key)) . ' given instead.'
-            );
+        if (!$key instanceof Key) {
+            throw new \TypeError('Key expected for argument 2. ' . \ucfirst(\gettype($key)) . ' given instead.');
         }
         if (!\is_bool($raw_binary)) {
-            throw new \TypeError(
-                'Boolean expected for argument 3. ' . \ucfirst(\gettype($raw_binary)) . ' given instead.'
-            );
+            throw new \TypeError('Boolean expected for argument 3. ' . \ucfirst(\gettype($raw_binary)) . ' given instead.');
         }
-        return self::decryptInternal(
-            $ciphertext,
-            KeyOrPassword::createFromKey($key),
-            $raw_binary
-        );
+        return self::decrypt_internal($ciphertext, Key_Or_Password::create_from_key($key), $raw_binary);
     }
-
     /**
      * Decrypts a ciphertext to a string with a password, using a slow key
      * derivation function to make password cracking more expensive.
@@ -136,34 +102,24 @@ class Crypto
      *
      * @return string
      */
-    public static function decryptWithPassword(
+    public static function decrypt_with_password(
         $ciphertext,
-        #[\SensitiveParameter]
+        #[\Sensitive_Parameter]
         $password,
         $raw_binary = false
-    ) {
+    )
+    {
         if (!\is_string($ciphertext)) {
-            throw new \TypeError(
-                'String expected for argument 1. ' . \ucfirst(\gettype($ciphertext)) . ' given instead.'
-            );
+            throw new \TypeError('String expected for argument 1. ' . \ucfirst(\gettype($ciphertext)) . ' given instead.');
         }
         if (!\is_string($password)) {
-            throw new \TypeError(
-                'String expected for argument 2. ' . \ucfirst(\gettype($password)) . ' given instead.'
-            );
+            throw new \TypeError('String expected for argument 2. ' . \ucfirst(\gettype($password)) . ' given instead.');
         }
         if (!\is_bool($raw_binary)) {
-            throw new \TypeError(
-                'Boolean expected for argument 3. ' . \ucfirst(\gettype($raw_binary)) . ' given instead.'
-            );
+            throw new \TypeError('Boolean expected for argument 3. ' . \ucfirst(\gettype($raw_binary)) . ' given instead.');
         }
-        return self::decryptInternal(
-            $ciphertext,
-            KeyOrPassword::createFromPassword($password),
-            $raw_binary
-        );
+        return self::decrypt_internal($ciphertext, Key_Or_Password::create_from_password($password), $raw_binary);
     }
-
     /**
      * Decrypts a legacy ciphertext produced by version 1 of this library.
      *
@@ -176,85 +132,58 @@ class Crypto
      *
      * @return string
      */
-    public static function legacyDecrypt(
+    public static function legacy_decrypt(
         $ciphertext,
-        #[\SensitiveParameter]
+        #[\Sensitive_Parameter]
         $key
-    ) {
+    )
+    {
         if (!\is_string($ciphertext)) {
-            throw new \TypeError(
-                'String expected for argument 1. ' . \ucfirst(\gettype($ciphertext)) . ' given instead.'
-            );
+            throw new \TypeError('String expected for argument 1. ' . \ucfirst(\gettype($ciphertext)) . ' given instead.');
         }
         if (!\is_string($key)) {
-            throw new \TypeError(
-                'String expected for argument 2. ' . \ucfirst(\gettype($key)) . ' given instead.'
-            );
+            throw new \TypeError('String expected for argument 2. ' . \ucfirst(\gettype($key)) . ' given instead.');
         }
-
-        RuntimeTests::runtimeTest();
-
+        Runtime_Tests::runtime_test();
         // Extract the HMAC from the front of the ciphertext.
-        if (Core::ourStrlen($ciphertext) <= Core::LEGACY_MAC_BYTE_SIZE) {
-            throw new Ex\WrongKeyOrModifiedCiphertextException(
-                'Ciphertext is too short.'
-            );
+        if (Core::our_strlen($ciphertext) <= Core::LEGACY_MAC_BYTE_SIZE) {
+            throw new Ex\Wrong_Key_Or_Modified_Ciphertext_Exception('Ciphertext is too short.');
         }
         /**
          * @var string
          */
-        $hmac = Core::ourSubstr($ciphertext, 0, Core::LEGACY_MAC_BYTE_SIZE);
-        Core::ensureTrue(\is_string($hmac));
+        $hmac = Core::our_substr($ciphertext, 0, Core::LEGACY_MAC_BYTE_SIZE);
+        Core::ensure_true(\is_string($hmac));
         /**
          * @var string
          */
-        $messageCiphertext = Core::ourSubstr($ciphertext, Core::LEGACY_MAC_BYTE_SIZE);
-        Core::ensureTrue(\is_string($messageCiphertext));
-
+        $message_ciphertext = Core::our_substr($ciphertext, Core::LEGACY_MAC_BYTE_SIZE);
+        Core::ensure_true(\is_string($message_ciphertext));
         // Regenerate the same authentication sub-key.
-        $akey = Core::HKDF(
-            Core::LEGACY_HASH_FUNCTION_NAME,
-            $key,
-            Core::LEGACY_KEY_BYTE_SIZE,
-            Core::LEGACY_AUTHENTICATION_INFO_STRING
-        );
-
-        if (self::verifyHMAC($hmac, $messageCiphertext, $akey)) {
+        $akey = Core::HKDF(Core::LEGACY_HASH_FUNCTION_NAME, $key, Core::LEGACY_KEY_BYTE_SIZE, Core::LEGACY_AUTHENTICATION_INFO_STRING);
+        if (self::verify_hmac($hmac, $message_ciphertext, $akey)) {
             // Regenerate the same encryption sub-key.
-            $ekey = Core::HKDF(
-                Core::LEGACY_HASH_FUNCTION_NAME,
-                $key,
-                Core::LEGACY_KEY_BYTE_SIZE,
-                Core::LEGACY_ENCRYPTION_INFO_STRING
-            );
-
+            $ekey = Core::HKDF(Core::LEGACY_HASH_FUNCTION_NAME, $key, Core::LEGACY_KEY_BYTE_SIZE, Core::LEGACY_ENCRYPTION_INFO_STRING);
             // Extract the IV from the ciphertext.
-            if (Core::ourStrlen($messageCiphertext) <= Core::LEGACY_BLOCK_BYTE_SIZE) {
-                throw new Ex\WrongKeyOrModifiedCiphertextException(
-                    'Ciphertext is too short.'
-                );
+            if (Core::our_strlen($message_ciphertext) <= Core::LEGACY_BLOCK_BYTE_SIZE) {
+                throw new Ex\Wrong_Key_Or_Modified_Ciphertext_Exception('Ciphertext is too short.');
             }
             /**
              * @var string
              */
-            $iv = Core::ourSubstr($messageCiphertext, 0, Core::LEGACY_BLOCK_BYTE_SIZE);
-            Core::ensureTrue(\is_string($iv));
-
+            $iv = Core::our_substr($message_ciphertext, 0, Core::LEGACY_BLOCK_BYTE_SIZE);
+            Core::ensure_true(\is_string($iv));
             /**
              * @var string
              */
-            $actualCiphertext = Core::ourSubstr($messageCiphertext, Core::LEGACY_BLOCK_BYTE_SIZE);
-            Core::ensureTrue(\is_string($actualCiphertext));
-
+            $actual_ciphertext = Core::our_substr($message_ciphertext, Core::LEGACY_BLOCK_BYTE_SIZE);
+            Core::ensure_true(\is_string($actual_ciphertext));
             // Do the decryption.
-            $plaintext = self::plainDecrypt($actualCiphertext, $ekey, $iv, Core::LEGACY_CIPHER_METHOD);
+            $plaintext = self::plain_decrypt($actual_ciphertext, $ekey, $iv, Core::LEGACY_CIPHER_METHOD);
             return $plaintext;
         }
-        throw new Ex\WrongKeyOrModifiedCiphertextException(
-            'Integrity check failed.'
-        );
+        throw new Ex\Wrong_Key_Or_Modified_Ciphertext_Exception('Integrity check failed.');
     }
-
     /**
      * Encrypts a string with either a key or a password.
      *
@@ -262,26 +191,22 @@ class Crypto
      * @param bool          $raw_binary
      * @return string
      */
-    private static function encryptInternal($plaintext, KeyOrPassword $secret, $raw_binary)
+    private static function encrypt_internal($plaintext, Key_Or_Password $secret, $raw_binary)
     {
-        RuntimeTests::runtimeTest();
-
-        $salt = Core::secureRandom(Core::SALT_BYTE_SIZE);
-        $keys = $secret->deriveKeys($salt);
-        $ekey = $keys->getEncryptionKey();
-        $akey = $keys->getAuthenticationKey();
-        $iv     = Core::secureRandom(Core::BLOCK_BYTE_SIZE);
-
-        $ciphertext = Core::CURRENT_VERSION . $salt . $iv . self::plainEncrypt($plaintext, $ekey, $iv);
-        $auth       = \hash_hmac(Core::HASH_FUNCTION_NAME, $ciphertext, $akey, true);
+        Runtime_Tests::runtime_test();
+        $salt = Core::secure_random(Core::SALT_BYTE_SIZE);
+        $keys = $secret->derive_keys($salt);
+        $ekey = $keys->get_encryption_key();
+        $akey = $keys->get_authentication_key();
+        $iv = Core::secure_random(Core::BLOCK_BYTE_SIZE);
+        $ciphertext = Core::CURRENT_VERSION . $salt . $iv . self::plain_encrypt($plaintext, $ekey, $iv);
+        $auth = \hash_hmac(Core::HASH_FUNCTION_NAME, $ciphertext, $akey, true);
         $ciphertext = $ciphertext . $auth;
-
         if ($raw_binary) {
             return $ciphertext;
         }
-        return Encoding::binToHex($ciphertext);
+        return Encoding::bin_to_hex($ciphertext);
     }
-
     /**
      * Decrypts a ciphertext to a string with either a key or a password.
      *
@@ -292,85 +217,49 @@ class Crypto
      * @throws Ex\WrongKeyOrModifiedCiphertextException
      * @return string
      */
-    private static function decryptInternal($ciphertext, KeyOrPassword $secret, $raw_binary)
+    private static function decrypt_internal($ciphertext, Key_Or_Password $secret, $raw_binary)
     {
-        RuntimeTests::runtimeTest();
-
-        if (! $raw_binary) {
+        Runtime_Tests::runtime_test();
+        if (!$raw_binary) {
             try {
-                $ciphertext = Encoding::hexToBin($ciphertext);
-            } catch (Ex\BadFormatException $ex) {
-                throw new Ex\WrongKeyOrModifiedCiphertextException(
-                    'Ciphertext has invalid hex encoding.'
-                );
+                $ciphertext = Encoding::hex_to_bin($ciphertext);
+            } catch (Ex\Bad_Format_Exception $ex) {
+                throw new Ex\Wrong_Key_Or_Modified_Ciphertext_Exception('Ciphertext has invalid hex encoding.');
             }
         }
-
-        if (Core::ourStrlen($ciphertext) < Core::MINIMUM_CIPHERTEXT_SIZE) {
-            throw new Ex\WrongKeyOrModifiedCiphertextException(
-                'Ciphertext is too short.'
-            );
+        if (Core::our_strlen($ciphertext) < Core::MINIMUM_CIPHERTEXT_SIZE) {
+            throw new Ex\Wrong_Key_Or_Modified_Ciphertext_Exception('Ciphertext is too short.');
         }
-
         // Get and check the version header.
         /** @var string $header */
-        $header = Core::ourSubstr($ciphertext, 0, Core::HEADER_VERSION_SIZE);
+        $header = Core::our_substr($ciphertext, 0, Core::HEADER_VERSION_SIZE);
         if ($header !== Core::CURRENT_VERSION) {
-            throw new Ex\WrongKeyOrModifiedCiphertextException(
-                'Bad version header.'
-            );
+            throw new Ex\Wrong_Key_Or_Modified_Ciphertext_Exception('Bad version header.');
         }
-
         // Get the salt.
         /** @var string $salt */
-        $salt = Core::ourSubstr(
-            $ciphertext,
-            Core::HEADER_VERSION_SIZE,
-            Core::SALT_BYTE_SIZE
-        );
-        Core::ensureTrue(\is_string($salt));
-
+        $salt = Core::our_substr($ciphertext, Core::HEADER_VERSION_SIZE, Core::SALT_BYTE_SIZE);
+        Core::ensure_true(\is_string($salt));
         // Get the IV.
         /** @var string $iv */
-        $iv = Core::ourSubstr(
-            $ciphertext,
-            Core::HEADER_VERSION_SIZE + Core::SALT_BYTE_SIZE,
-            Core::BLOCK_BYTE_SIZE
-        );
-        Core::ensureTrue(\is_string($iv));
-
+        $iv = Core::our_substr($ciphertext, Core::HEADER_VERSION_SIZE + Core::SALT_BYTE_SIZE, Core::BLOCK_BYTE_SIZE);
+        Core::ensure_true(\is_string($iv));
         // Get the HMAC.
         /** @var string $hmac */
-        $hmac = Core::ourSubstr(
-            $ciphertext,
-            Core::ourStrlen($ciphertext) - Core::MAC_BYTE_SIZE,
-            Core::MAC_BYTE_SIZE
-        );
-        Core::ensureTrue(\is_string($hmac));
-
+        $hmac = Core::our_substr($ciphertext, Core::our_strlen($ciphertext) - Core::MAC_BYTE_SIZE, Core::MAC_BYTE_SIZE);
+        Core::ensure_true(\is_string($hmac));
         // Get the actual encrypted ciphertext.
         /** @var string $encrypted */
-        $encrypted = Core::ourSubstr(
-            $ciphertext,
-            Core::HEADER_VERSION_SIZE + Core::SALT_BYTE_SIZE +
-                Core::BLOCK_BYTE_SIZE,
-            Core::ourStrlen($ciphertext) - Core::MAC_BYTE_SIZE - Core::SALT_BYTE_SIZE -
-                Core::BLOCK_BYTE_SIZE - Core::HEADER_VERSION_SIZE
-        );
-        Core::ensureTrue(\is_string($encrypted));
-
+        $encrypted = Core::our_substr($ciphertext, Core::HEADER_VERSION_SIZE + Core::SALT_BYTE_SIZE + Core::BLOCK_BYTE_SIZE, Core::our_strlen($ciphertext) - Core::MAC_BYTE_SIZE - Core::SALT_BYTE_SIZE - Core::BLOCK_BYTE_SIZE - Core::HEADER_VERSION_SIZE);
+        Core::ensure_true(\is_string($encrypted));
         // Derive the separate encryption and authentication keys from the key
         // or password, whichever it is.
-        $keys = $secret->deriveKeys($salt);
-
-        if (self::verifyHMAC($hmac, $header . $salt . $iv . $encrypted, $keys->getAuthenticationKey())) {
-            return self::plainDecrypt($encrypted, $keys->getEncryptionKey(), $iv, Core::CIPHER_METHOD);
+        $keys = $secret->derive_keys($salt);
+        if (self::verify_hmac($hmac, $header . $salt . $iv . $encrypted, $keys->get_authentication_key())) {
+            return self::plain_decrypt($encrypted, $keys->get_encryption_key(), $iv, Core::CIPHER_METHOD);
         }
-        throw new Ex\WrongKeyOrModifiedCiphertextException(
-            'Integrity check failed.'
-        );
+        throw new Ex\Wrong_Key_Or_Modified_Ciphertext_Exception('Integrity check failed.');
     }
-
     /**
      * Raw unauthenticated encryption (insecure on its own).
      *
@@ -382,29 +271,21 @@ class Crypto
      *
      * @return string
      */
-    protected static function plainEncrypt(
+    protected static function plain_encrypt(
         $plaintext,
-        #[\SensitiveParameter]
+        #[\Sensitive_Parameter]
         $key,
-        #[\SensitiveParameter]
+        #[\Sensitive_Parameter]
         $iv
-    ) {
-        Core::ensureConstantExists('OPENSSL_RAW_DATA');
-        Core::ensureFunctionExists('openssl_encrypt');
+    )
+    {
+        Core::ensure_constant_exists('OPENSSL_RAW_DATA');
+        Core::ensure_function_exists('openssl_encrypt');
         /** @var string $ciphertext */
-        $ciphertext = \openssl_encrypt(
-            $plaintext,
-            Core::CIPHER_METHOD,
-            $key,
-            OPENSSL_RAW_DATA,
-            $iv
-        );
-
-        Core::ensureTrue(\is_string($ciphertext), 'openssl_encrypt() failed');
-
+        $ciphertext = \openssl_encrypt($plaintext, Core::CIPHER_METHOD, $key, OPENSSL_RAW_DATA, $iv);
+        Core::ensure_true(\is_string($ciphertext), 'openssl_encrypt() failed');
         return $ciphertext;
     }
-
     /**
      * Raw unauthenticated decryption (insecure on its own).
      *
@@ -417,30 +298,22 @@ class Crypto
      *
      * @return string
      */
-    protected static function plainDecrypt(
+    protected static function plain_decrypt(
         $ciphertext,
-        #[\SensitiveParameter]
+        #[\Sensitive_Parameter]
         $key,
-        #[\SensitiveParameter]
+        #[\Sensitive_Parameter]
         $iv,
-        $cipherMethod
-    ) {
-        Core::ensureConstantExists('OPENSSL_RAW_DATA');
-        Core::ensureFunctionExists('openssl_decrypt');
-
+        $cipher_method
+    )
+    {
+        Core::ensure_constant_exists('OPENSSL_RAW_DATA');
+        Core::ensure_function_exists('openssl_decrypt');
         /** @var string $plaintext */
-        $plaintext = \openssl_decrypt(
-            $ciphertext,
-            $cipherMethod,
-            $key,
-            OPENSSL_RAW_DATA,
-            $iv
-        );
-        Core::ensureTrue(\is_string($plaintext), 'openssl_decrypt() failed.');
-
+        $plaintext = \openssl_decrypt($ciphertext, $cipher_method, $key, OPENSSL_RAW_DATA, $iv);
+        Core::ensure_true(\is_string($plaintext), 'openssl_decrypt() failed.');
         return $plaintext;
     }
-
     /**
      * Verifies an HMAC without leaking information through side-channels.
      *
@@ -452,13 +325,14 @@ class Crypto
      *
      * @return bool
      */
-    protected static function verifyHMAC(
+    protected static function verify_hmac(
         $expected_hmac,
         $message,
-        #[\SensitiveParameter]
+        #[\Sensitive_Parameter]
         $key
-    ) {
+    )
+    {
         $message_hmac = \hash_hmac(Core::HASH_FUNCTION_NAME, $message, $key, true);
-        return Core::hashEquals($message_hmac, $expected_hmac);
+        return Core::hash_equals($message_hmac, $expected_hmac);
     }
 }

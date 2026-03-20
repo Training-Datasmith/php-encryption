@@ -1,9 +1,8 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Defuse\Crypto\Exception;
 
-class IOException extends \Defuse\Crypto\Exception\CryptoException
+class Io_Exception extends \Defuse\Crypto\Exception\Crypto_Exception
 {
 }
