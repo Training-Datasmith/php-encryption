@@ -130,6 +130,30 @@ final class Core
      *
      * @return string $length bytes of output keying material.
      */
+    public static function hkdf_prepare_salt_for_native($salt)
+    {
+        if (\is_null($salt)) {
+            $salt = '';
+        }
+        return $salt;
+    }
+
+    /**
+     * Normalize HKDF salt on the pure-PHP fallback path (RFC 5869: null → HashLen zero bytes).
+     *
+     * @param string|null $salt
+     * @param int         $digest_length Hash output size in bytes for $hash
+     *
+     * @return string
+     */
+    public static function hkdf_prepare_salt_for_fallback($salt, $digest_length)
+    {
+        if (\is_null($salt)) {
+            $salt = \str_repeat("\x00", $digest_length);
+        }
+        return $salt;
+    }
+
     public static function HKDF($hash, $ikm, $length, $info = '', $salt = null)
     {
         static $native_hkdf = null;
@@ -137,18 +161,14 @@ final class Core
             $native_hkdf = \is_callable('\hash_hkdf');
         }
         if ($native_hkdf) {
-            if (\is_null($salt)) {
-                $salt = '';
-            }
+            $salt = self::hkdf_prepare_salt_for_native($salt);
             return \hash_hkdf($hash, $ikm, $length, $info, $salt);
         }
         $digest_length = Core::our_strlen(\hash_hmac($hash, '', '', true));
         // Sanity-check the desired output length.
         Core::ensure_true(!empty($length) && \is_int($length) && $length >= 0 && $length <= 255 * $digest_length, 'Bad output length requested of HDKF.');
         // "if [salt] not provided, is set to a string of HashLen zeroes."
-        if (\is_null($salt)) {
-            $salt = \str_repeat("\x00", $digest_length);
-        }
+        $salt = self::hkdf_prepare_salt_for_fallback($salt, $digest_length);
         // HKDF-Extract:
         // PRK = HMAC-Hash(salt, IKM)
         // The salt is the HMAC key.

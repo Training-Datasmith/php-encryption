@@ -145,6 +145,11 @@ if ! grep -Fxq "${FULL_GATE_EXPECTED}" "${ROOT_DIR}/.system-test/phpunit-full-ga
 fi
 log "phpunit full gate: ${FULL_GATE_EXPECTED}"
 
+log "HKDF native null-salt probe (PHP 7.2)"
+"${DOCKER[@]}" run --rm -v "${ROOT_DIR}:/app" -w /app "${IMAGE_TEST}" \
+  php scripts/hkdf-null-salt-native-probe.php 2>&1 | tee "${ROOT_DIR}/.system-test/hkdf-native-probe.out"
+gate_line '^OK hkdf-null-salt native probe$' "${ROOT_DIR}/.system-test/hkdf-native-probe.out" "hkdf native null-salt probe"
+
 log "HKDF null-salt floor test (PHP 5.6 fallback)"
 "${DOCKER[@]}" run --rm -v "${ROOT_DIR}:/app" -w /app "${IMAGE_FLOOR}" \
   php scripts/hkdf-null-salt-floor-test.php 2>&1 | tee "${ROOT_DIR}/.system-test/hkdf-floor.out"
