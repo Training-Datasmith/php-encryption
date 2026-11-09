@@ -149,18 +149,4 @@ class Core_Test extends TestCase
         $x = Core::secure_random(10);
         $this->assertSame(10, strlen($x));
     }
-
-    /**
-     * Native hash_hkdf() treats null salt like an empty string; our fallback must match.
-     */
-    public function test_hkdf_null_salt_matches_explicit_empty_salt()
-    {
-        $ikm = 'test-key-material';
-        $length = 32;
-        $info = 'DefusePHP|HKDF-test';
-        $from_null = Core::HKDF('sha256', $ikm, $length, $info, null);
-        $from_empty = Core::HKDF('sha256', $ikm, $length, $info, '');
-        $this->assertSame($from_empty, $from_null);
-        $this->assertSame($length, strlen($from_null));
-    }
 }

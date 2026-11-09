@@ -1,9 +1,15 @@
 <phpunit beStrictAboutTestsThatDoNotTestAnything="false">
     <testsuites>
-        <testsuite name="unit">
+        <testsuite name="baseline">
             <directory>unit</directory>
         </testsuite>
-        <testsuite name="security">
+        <testsuite name="added">
+            <directory>../tests/Added</directory>
+            <directory>../tests/Security</directory>
+        </testsuite>
+        <testsuite name="all">
+            <directory>unit</directory>
+            <directory>../tests/Added</directory>
             <directory>../tests/Security</directory>
         </testsuite>
     </testsuites>

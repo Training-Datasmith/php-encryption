@@ -1,12 +1,14 @@
 #!/usr/bin/env php
 <?php
 /**
- * Fail on leftover pre-rename repo identifiers or repo-owned camelCase outside allowlist.
+ * Fail on leftover pre-rename repo identifiers or repo-owned camelCase outside site allowlist.
  */
 
 $root = dirname(__DIR__);
+require __DIR__ . '/rename-scan.php';
+
 $allowlist = require __DIR__ . '/rename-allowlist.php';
-$allowSet = array_fill_keys($allowlist, true);
+$allowSites = isset($allowlist['sites']) ? $allowlist['sites'] : array();
 
 $oldNames = array(
     'incrementCounter', 'secureRandom', 'hashEquals', 'ensureConstantExists', 'ensureFunctionExists',
@@ -38,105 +40,74 @@ foreach (array('README.md', 'ARCHITECTURE.md') as $extra) {
     }
 }
 
-$isAllowedCamel = static function ($class, $method) use ($allowSet) {
-    $site = $class . '::' . $method;
-    return isset($allowSet[$site]);
-};
-
-$isStudlySnakeOrSimple = static function ($name) {
-    if ($name === 'HKDF' || $name === 'Crypto' || $name === 'Core' || $name === 'File' || $name === 'Key' || $name === 'Encoding') {
-        return true;
-    }
-    if (strpos($name, '__') === 0) {
-        return true;
-    }
-    $parts = explode('_', $name);
-    foreach ($parts as $p) {
-        if ($p === '') {
-            return false;
-        }
-        if (!ctype_upper($p[0])) {
-            return false;
-        }
-        if (preg_match('/[A-Z]/', substr($p, 1))) {
-            return false;
-        }
-    }
-    return true;
-};
-
-$isSnakeFunc = static function ($name) {
-    if (strpos($name, '__') === 0) {
-        return true;
-    }
-    if (preg_match('/^[a-z][a-z0-9_]*$/', $name)) {
-        return true;
-    }
-  if (preg_match('/^test_[a-z0-9_]+$/', $name)) {
-        return true;
-    }
-    return false;
-};
-
 $failures = array();
-
 foreach ($paths as $path) {
     $rel = str_replace($root . '/', '', $path);
     $text = file_get_contents($path);
-    foreach ($oldNames as $old) {
-        if (strpos($text, $old) !== false) {
-            $failures[] = "{$rel}: leftover old identifier {$old}";
-        }
-    }
-    if (!preg_match('/\.php$/', $path)) {
-        continue;
-    }
-    if (!preg_match_all('/^\s*(?:public|protected|private)?\s*function\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(/m', $text, $m)) {
-        $m = array(array(), array());
-    }
-    $class = 'global';
-    if (preg_match('/^\s*class\s+([A-Za-z_][A-Za-z0-9_]*)/m', $text, $cm)) {
-        $class = $cm[1];
-    }
-    $extendsPhpUnit = (bool) preg_match(
-        '/extends\s+(?:\\\\?PHPUnit\\\\Framework\\\\TestCase|\\\\?Yoast\\\\PHPUnitPolyfills\\\\TestCases\\\\TestCase|TestCase)\b/',
-        $text
-    );
-    if (!$extendsPhpUnit && preg_match('/use\s+PHPUnit\\\\Framework\\\\TestCase\s*;/', $text) && preg_match('/extends\s+TestCase\b/', $text)) {
-        $extendsPhpUnit = true;
-    }
-    foreach ($m[1] as $fn) {
-        if ($extendsPhpUnit && ($fn === 'setUp' || $fn === 'tearDown')) {
-            continue;
-        }
-        if (!$isSnakeFunc($fn) && !$isAllowedCamel($class, $fn)) {
-            $failures[] = "{$rel}: repo-owned method not snake_case: {$class}::{$fn}";
-        }
-    }
-    if (preg_match_all('/^\s*(?:final\s+|abstract\s+)?class\s+([A-Za-z_][A-Za-z0-9_]*)/m', $text, $classes)) {
-        foreach ($classes[1] as $cn) {
-            if (!$isStudlySnakeOrSimple($cn) && !$isAllowedCamel('N/A', $cn)) {
-                $failures[] = "{$rel}: repo-owned class not Studly_Snake_Case: {$cn}";
-            }
-        }
-    }
+  $failures = array_merge($failures, rename_scan_content($rel, $text, $allowSites, $oldNames));
 }
 
-// In-memory demo: allowlisted set_up must be rejected outside Yoast TestCase.
-$demoSource = <<<'PHP'
+// In-memory demos using the real scanner (not a parallel code path).
+$demoWrongSite = <<<'PHP'
 <?php
-class Not_A_Test_Helper {
-    public function set_up() {}
+namespace Defuse\Crypto\Tests\Security;
+
+use PHPUnit\Framework\TestCase;
+
+class Wrong_Site_SetUp_Test extends TestCase
+{
+    protected function setUp(): void
+    {
+    }
 }
 PHP;
-$demoFailures = array();
-if (preg_match('/function\s+set_up\s*\(/', $demoSource) && !preg_match('/extends\s+TestCase/', $demoSource)) {
-    $demoFailures[] = 'allowlist demo: set_up outside TestCase should fail';
-}
-if (count($demoFailures) === 0) {
-    $failures[] = 'rename-check: in-memory allowlist demo did not detect misuse';
+$wrongFailures = rename_scan_content('demo/Wrong_Site_SetUp_Test.php', $demoWrongSite, $allowSites, array());
+if (count($wrongFailures) === 0) {
+    $failures[] = 'rename-check: setUp at unlisted site must be rejected';
 } else {
-    fwrite(STDOUT, "rename-check: allowlist demo rejected set_up outside TestCase.\n");
+    fwrite(STDOUT, "rename-check: in-memory demo rejected setUp at unlisted site.\n");
+}
+
+$demoListedSite = <<<'PHP'
+<?php
+namespace Defuse\Crypto\Tests\Security;
+
+use Defuse\Crypto\Crypto;
+use Defuse\Crypto\Key;
+use PHPUnit\Framework\TestCase;
+
+class Ciphertext_Integrity_Test extends TestCase
+{
+    protected function setUp(): void
+    {
+        $this->key = Key::create_new_random_key();
+    }
+
+    public function test_demo(): void
+    {
+    }
+}
+PHP;
+$listedFailures = rename_scan_content('tests/Security/Ciphertext_Integrity_Test.php', $demoListedSite, $allowSites, array());
+if (count($listedFailures) !== 0) {
+    foreach ($listedFailures as $lf) {
+        $failures[] = 'rename-check: setUp at allowlisted site wrongly flagged: ' . $lf;
+    }
+} else {
+    fwrite(STDOUT, "rename-check: in-memory demo accepted setUp at allowlisted site.\n");
+}
+
+$demoCamelRepo = <<<'PHP'
+<?php
+class Demo_Repo_Owned {
+    public function doBadThing() {}
+}
+PHP;
+$camelFailures = rename_scan_content('demo/Demo_Repo_Owned.php', $demoCamelRepo, $allowSites, array());
+if (count($camelFailures) === 0) {
+    $failures[] = 'rename-check: generic camelCase repo-owned name must be rejected';
+} else {
+    fwrite(STDOUT, "rename-check: in-memory demo rejected generic camelCase repo method.\n");
 }
 
 if (count($failures) > 0) {

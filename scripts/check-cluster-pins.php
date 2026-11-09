@@ -136,7 +136,7 @@ $demoAlias = '8.5.52';
 $goodSha = '0123456789abcdef0123456789abcdef01234567';
 $badSha = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 
-$assertDemoPackage = static function (array $versionsMap, array $jsonPkgs, $name, array $want) use ($normalizeSha) {
+$assertPhpSide = static function (array $versionsMap, $name, array $want) {
     if (!isset($versionsMap[$name])) {
         return false;
     }
@@ -149,10 +149,18 @@ $assertDemoPackage = static function (array $versionsMap, array $jsonPkgs, $name
     if (!is_string($ref) || !hash_equals($want['reference'], $ref)) {
         return false;
     }
+    return true;
+};
+
+$assertJsonSide = static function (array $jsonPkgs, $name, array $want) use ($normalizeSha) {
     if (!isset($jsonPkgs[$name]['source']['reference'])) {
         return false;
     }
     return $normalizeSha($jsonPkgs[$name]['source']['reference']) === $normalizeSha($want['reference']);
+};
+
+$assertDemoPackage = static function (array $versionsMap, array $jsonPkgs, $name, array $want) use ($assertPhpSide, $assertJsonSide) {
+    return $assertPhpSide($versionsMap, $name, $want) && $assertJsonSide($jsonPkgs, $name, $want);
 };
 
 $demoExpected = array(
@@ -170,27 +178,39 @@ $jsonDemo[$demoPackage] = array(
     'source' => array('reference' => $goodSha, 'url' => 'https://github.com/example/demo.git'),
 );
 
-$versionsBadPhp = $versionsDemo;
+$snapshotVersions = $versionsDemo;
+$snapshotJson = $jsonDemo;
+
+$versionsBadPhp = $snapshotVersions;
 $versionsBadPhp[$demoPackage]['reference'] = $badSha;
-if ($assertDemoPackage($versionsBadPhp, $jsonDemo, $demoPackage, $demoExpected[$demoPackage])) {
+
+if ($assertPhpSide($versionsBadPhp, $demoPackage, $demoExpected[$demoPackage])) {
     fwrite(STDERR, "check-cluster-pins: wrong-SHA demo did not fail on installed.php side.\n");
     exit(1);
 }
-if (!$assertDemoPackage($versionsDemo, $jsonDemo, $demoPackage, $demoExpected[$demoPackage])) {
-    fwrite(STDERR, "check-cluster-pins: wrong-SHA demo: installed.php side should pass with good SHA.\n");
+if (!$assertJsonSide($snapshotJson, $demoPackage, $demoExpected[$demoPackage])) {
+    fwrite(STDERR, "check-cluster-pins: wrong-SHA demo: unmutated installed.json side should still pass.\n");
+    exit(1);
+}
+if (!$assertDemoPackage($snapshotVersions, $snapshotJson, $demoPackage, $demoExpected[$demoPackage])) {
+    fwrite(STDERR, "check-cluster-pins: wrong-SHA demo: original snapshot should pass both sides.\n");
     exit(1);
 }
 fwrite(STDOUT, "check-cluster-pins: wrong-SHA demo failed on installed.php only.\n");
 
-$jsonBad = $jsonDemo;
+$jsonBad = $snapshotJson;
 $jsonBad[$demoPackage]['source']['reference'] = $badSha;
-if ($assertDemoPackage($versionsDemo, $jsonBad, $demoPackage, $demoExpected[$demoPackage])) {
+
+if ($assertJsonSide($jsonBad, $demoPackage, $demoExpected[$demoPackage])) {
     fwrite(STDERR, "check-cluster-pins: wrong-SHA demo did not fail on installed.json side.\n");
     exit(1);
 }
-$jsonGood = $jsonDemo;
-if (!$assertDemoPackage($versionsDemo, $jsonGood, $demoPackage, $demoExpected[$demoPackage])) {
-    fwrite(STDERR, "check-cluster-pins: wrong-SHA demo: installed.json side should pass with good SHA.\n");
+if (!$assertPhpSide($snapshotVersions, $demoPackage, $demoExpected[$demoPackage])) {
+    fwrite(STDERR, "check-cluster-pins: wrong-SHA demo: unmutated installed.php side should still pass.\n");
+    exit(1);
+}
+if (!$assertDemoPackage($snapshotVersions, $snapshotJson, $demoPackage, $demoExpected[$demoPackage])) {
+    fwrite(STDERR, "check-cluster-pins: wrong-SHA demo: original snapshot should pass after json mutation demo.\n");
     exit(1);
 }
 fwrite(STDOUT, "check-cluster-pins: wrong-SHA demo failed on installed.json only.\n");
