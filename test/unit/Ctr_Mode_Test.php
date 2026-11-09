@@ -5,9 +5,9 @@ declare(strict_types=1);
 use Defuse\Crypto\Core;
 use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
-class CtrModeTest extends TestCase
+class Ctr_Mode_Test extends TestCase
 {
-    public static function counterTestVectorProvider()
+    public static function counter_test_vector_provider()
     {
         return [
             /* First byte, no overflow. */
@@ -63,11 +63,11 @@ class CtrModeTest extends TestCase
     }
 
     /**
-     * @dataProvider counterTestVectorProvider
+     * @dataProvider counter_test_vector_provider
      */
-    public function testIncrementCounterTestVector($start, $end, $inc)
+    public function test_increment_counter_test_vector($start, $end, $inc)
     {
-        $actual_end = \Defuse\Crypto\Core::incrementCounter(\hex2bin($start), $inc);
+        $actual_end = \Defuse\Crypto\Core::increment_counter(\hex2bin($start), $inc);
         $this->assertSame(
             $end,
             \bin2hex($actual_end),
@@ -75,7 +75,7 @@ class CtrModeTest extends TestCase
         );
     }
 
-    public function testFuzzIncrementCounter()
+    public function test_fuzz_increment_counter()
     {
         /* Test carry propagation. */
         for ($offset = 0; $offset < 16; $offset++) {
@@ -91,7 +91,7 @@ class CtrModeTest extends TestCase
              */
             $start        = str_repeat("\xFF", $offset) . "\xFE" . str_repeat("\xFF", 16 - $offset - 1);
             $expected_end = str_repeat("\xFF", $offset + 1) . str_repeat("\x00", 16 - $offset - 1);
-            $actual_end   = \Defuse\Crypto\Core::incrementCounter($start, 1);
+            $actual_end   = \Defuse\Crypto\Core::increment_counter($start, 1);
             $this->assertSame(
                 \bin2hex($expected_end),
                 \bin2hex($actual_end),
@@ -119,7 +119,7 @@ class CtrModeTest extends TestCase
                 chr(($sum >> 16) & 0xff) .
                 chr(($sum >> 8) & 0xff) .
                 chr(($sum >> 0) & 0xff);
-            $actual_end = \Defuse\Crypto\Core::incrementCounter($start, $rand_b);
+            $actual_end = \Defuse\Crypto\Core::increment_counter($start, $rand_b);
 
             $this->assertSame(
                 \bin2hex($expected_end),
@@ -129,25 +129,25 @@ class CtrModeTest extends TestCase
         }
     }
 
-    public function testIncrementByNegativeValue()
+    public function test_increment_by_negative_value()
     {
-        $this->expectException(\Defuse\Crypto\Exception\EnvironmentIsBrokenException::class);
-        \Defuse\Crypto\Core::incrementCounter(
+        $this->expectException(\Defuse\Crypto\Exception\Environment_Is_Broken_Exception::class);
+        \Defuse\Crypto\Core::increment_counter(
             str_repeat("\x00", 16),
             -1
         );
     }
 
-    public function testIncrementByZero()
+    public function test_increment_by_zero()
     {
-        $this->expectException(\Defuse\Crypto\Exception\EnvironmentIsBrokenException::class);
-        \Defuse\Crypto\Core::incrementCounter(
+        $this->expectException(\Defuse\Crypto\Exception\Environment_Is_Broken_Exception::class);
+        \Defuse\Crypto\Core::increment_counter(
             str_repeat("\x00", 16),
             0
         );
     }
 
-    public static function allNonZeroByteValuesProvider()
+    public static function all_non_zero_byte_values_provider()
     {
         $all_bytes = [];
         for ($i = 1; $i <= 0xff; $i++) {
@@ -157,45 +157,45 @@ class CtrModeTest extends TestCase
     }
 
     /**
-     * @dataProvider allNonZeroByteValuesProvider
+     * @dataProvider all_non_zero_byte_values_provider
      */
-    public function testIncrementCausingOverflowInFirstByte($lsb)
+    public function test_increment_causing_overflow_in_first_byte($lsb)
     {
         /* Smallest value that will overflow. */
         $increment = (PHP_INT_MAX - $lsb) + 1;
         $start     = str_repeat("\x00", 15) . chr($lsb);
-        $this->expectException(\Defuse\Crypto\Exception\EnvironmentIsBrokenException::class);
-        \Defuse\Crypto\Core::incrementCounter($start, $increment);
+        $this->expectException(\Defuse\Crypto\Exception\Environment_Is_Broken_Exception::class);
+        \Defuse\Crypto\Core::increment_counter($start, $increment);
     }
 
-    public function testIncrementWithShortIvLength()
+    public function test_increment_with_short_iv_length()
     {
-        $this->expectException(\Defuse\Crypto\Exception\EnvironmentIsBrokenException::class);
-        \Defuse\Crypto\Core::incrementCounter(
+        $this->expectException(\Defuse\Crypto\Exception\Environment_Is_Broken_Exception::class);
+        \Defuse\Crypto\Core::increment_counter(
             str_repeat("\x00", 15),
             1
         );
     }
 
-    public function testIncrementWithLongIvLength()
+    public function test_increment_with_long_iv_length()
     {
-        $this->expectException(\Defuse\Crypto\Exception\EnvironmentIsBrokenException::class);
-        \Defuse\Crypto\Core::incrementCounter(
+        $this->expectException(\Defuse\Crypto\Exception\Environment_Is_Broken_Exception::class);
+        \Defuse\Crypto\Core::increment_counter(
             str_repeat("\x00", 17),
             1
         );
     }
 
-    public function testIncrementByNonInteger()
+    public function test_increment_by_non_integer()
     {
-        $this->expectException(\Defuse\Crypto\Exception\EnvironmentIsBrokenException::class);
-        \Defuse\Crypto\Core::incrementCounter(
+        $this->expectException(\Defuse\Crypto\Exception\Environment_Is_Broken_Exception::class);
+        \Defuse\Crypto\Core::increment_counter(
             str_repeat("\x00", 16),
             1.0
         );
     }
 
-    public function testCompatibilityWithOpenSSL()
+    public function test_compatibility_with_open_ssl()
     {
         /* Plaintext is 0x300 blocks. */
         $plaintext = str_repeat('a', 0x300 * 16);
@@ -215,7 +215,7 @@ class CtrModeTest extends TestCase
         $cipher_lasthalf = mb_substr($ciphertext, 0x150 * 16, 0x150 * 16, '8bit');
 
         /* Compute what the nonce should be at the start of the last half. */
-        $computed_nonce = \Defuse\Crypto\Core::incrementCounter(
+        $computed_nonce = \Defuse\Crypto\Core::increment_counter(
             $starting_nonce,
             0x150
         );

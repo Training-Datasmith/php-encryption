@@ -5,16 +5,16 @@ declare(strict_types=1);
 use Defuse\Crypto\Core;
 use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
-class CoreTest extends TestCase
+class Core_Test extends TestCase
 {
     // The specific bug the following two tests check for did not fail when
     // mbstring.func_overload=0 so it is crucial to run these tests with
     // mbstring.func_overload=7 as well.
 
-    public function testOurSubstrTrailingEmptyStringBugWeird()
+    public function test_our_substr_trailing_empty_string_bug_weird()
     {
         $str = hex2bin('4d8ab774261977e13049c42b4996f2c4');
-        $this->assertSame(16, Core::ourStrlen($str));
+        $this->assertSame(16, Core::our_strlen($str));
 
         if (ini_get('mbstring.func_overload') == 7) {
             // This checks that the above hex string is indeed "weird."
@@ -29,7 +29,7 @@ class CoreTest extends TestCase
         } else {
             $this->assertSame(16, strlen($str));
 
-            // We want ourSubstr to behave identically to substr() in PHP 7 in
+            // We want our_substr to behave identically to substr() in PHP 7 in
             // the non-mbstring case. This double checks what that behavior is.
             if (version_compare(phpversion(), '7.0.0', '>=')) {
                 $this->assertSame(
@@ -57,11 +57,11 @@ class CoreTest extends TestCase
         // This checks that the behavior is indeed the same.
         $this->assertSame(
             '',
-            Core::ourSubstr($str, 16)
+            Core::our_substr($str, 16)
         );
     }
 
-    public function testOurSubstrTrailingEmptyStringBugNormal()
+    public function test_our_substr_trailing_empty_string_bug_normal()
     {
         // Same as above but with a non-weird string.
         $str = 'AAAAAAAAAAAAAAAA';
@@ -70,21 +70,21 @@ class CoreTest extends TestCase
         } else {
             $this->assertSame(16, strlen($str));
         }
-        $this->assertSame(16, Core::ourStrlen($str));
+        $this->assertSame(16, Core::our_strlen($str));
         $this->assertSame(
             '',
-            Core::ourSubstr($str, 16)
+            Core::our_substr($str, 16)
         );
     }
 
-    public function testOurSubstrOutOfBorders()
+    public function test_our_substr_out_of_borders()
     {
         // See: https://secure.php.net/manual/en/function.mb-substr.php#50275
 
         // We want to be like substr, so confirm that behavior.
         if (PHP_VERSION_ID < 80000) {
             // In PHP 8.0, substr starts returning '' instead of false.
-            // Core::ourSubstr should behave the OLD way.
+            // Core::our_substr should behave the OLD way.
             $this->assertSame(
                 false,
                 substr('abc', 5, 2)
@@ -110,43 +110,57 @@ class CoreTest extends TestCase
         // Check if we actually have that behavior.
         $this->assertSame(
             false,
-            Core::ourSubstr('abc', 5, 2)
+            Core::our_substr('abc', 5, 2)
         );
     }
 
-    public function testOurSubstrNegativeLength()
+    public function test_our_substr_negative_length()
     {
         $this->expectException(\InvalidArgumentException::class);
-        Core::ourSubstr('abc', 0, -1);
+        Core::our_substr('abc', 0, -1);
     }
 
-    public function testOurSubstrNegativeStart()
+    public function test_our_substr_negative_start()
     {
-        $this->assertSame('c', Core::ourSubstr('abc', -1, 1));
+        $this->assertSame('c', Core::our_substr('abc', -1, 1));
     }
 
-    public function testOurSubstrLengthIsMax()
+    public function test_our_substr_length_is_max()
     {
-        $this->assertSame('bc', Core::ourSubstr('abc', 1, 500));
+        $this->assertSame('bc', Core::our_substr('abc', 1, 500));
     }
 
-    public function testSecureRandomZeroLength()
+    public function test_secure_random_zero_length()
     {
-        $this->expectException(\Defuse\Crypto\Exception\CryptoException::class);
+        $this->expectException(\Defuse\Crypto\Exception\Crypto_Exception::class);
         $this->expectExceptionMessage('zero or negative');
-        Core::secureRandom(0);
+        Core::secure_random(0);
     }
 
-    public function testSecureRandomNegativeLength()
+    public function test_secure_random_negative_length()
     {
-        $this->expectException(\Defuse\Crypto\Exception\CryptoException::class);
+        $this->expectException(\Defuse\Crypto\Exception\Crypto_Exception::class);
         $this->expectExceptionMessage('zero or negative');
-        Core::secureRandom(-1);
+        Core::secure_random(-1);
     }
 
-    public function testSecureRandomPositiveLength()
+    public function test_secure_random_positive_length()
     {
-        $x = Core::secureRandom(10);
+        $x = Core::secure_random(10);
         $this->assertSame(10, strlen($x));
+    }
+
+    /**
+     * Native hash_hkdf() treats null salt like an empty string; our fallback must match.
+     */
+    public function test_hkdf_null_salt_matches_explicit_empty_salt()
+    {
+        $ikm = 'test-key-material';
+        $length = 32;
+        $info = 'DefusePHP|HKDF-test';
+        $from_null = Core::HKDF('sha256', $ikm, $length, $info, null);
+        $from_empty = Core::HKDF('sha256', $ikm, $length, $info, '');
+        $this->assertSame($from_empty, $from_null);
+        $this->assertSame($length, strlen($from_null));
     }
 }

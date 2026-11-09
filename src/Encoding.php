@@ -1,21 +1,19 @@
 <?php
-
-declare (strict_types=1);
 namespace Defuse\Crypto;
 
 use Defuse\Crypto\Exception as Ex;
 final class Encoding
 {
-    public const CHECKSUM_BYTE_SIZE = 32;
-    public const CHECKSUM_HASH_ALGO = 'sha256';
-    public const SERIALIZE_HEADER_BYTES = 4;
+    const CHECKSUM_BYTE_SIZE = 32;
+    const CHECKSUM_HASH_ALGO = 'sha256';
+    const SERIALIZE_HEADER_BYTES = 4;
     /**
      * Converts a byte string to a hexadecimal string without leaking
      * information through side channels.
      *
      * @param string $byte_string
      *
-     * @throws Ex\EnvironmentIsBrokenException
+     * @throws Ex\Environment_Is_Broken_Exception
      *
      * @return string
      */
@@ -36,8 +34,8 @@ final class Encoding
      *
      * @param string $hex_string
      *
-     * @throws Ex\BadFormatException
-     * @throws Ex\EnvironmentIsBrokenException
+     * @throws Ex\Bad_Format_Exception
+     * @throws Ex\Environment_Is_Broken_Exception
      *
      * @return string
      * @psalm-suppress TypeDoesNotContainType
@@ -56,7 +54,7 @@ final class Encoding
             $c_alpha = ($c & ~32) - 55;
             $c_alpha0 = ($c_alpha - 10 ^ $c_alpha - 16) >> 8;
             if (($c_num0 | $c_alpha0) === 0) {
-                throw new Ex\Bad_Format_Exception('Encoding::hexToBin() input is not a hex string.');
+                throw new Ex\Bad_Format_Exception('Encoding::hex_to_bin() input is not a hex string.');
             }
             $c_val = $c_num0 & $c_num | $c_alpha & $c_alpha0;
             if ($state === 0) {
@@ -154,13 +152,13 @@ final class Encoding
      * @param string $header
      * @param string $bytes
      *
-     * @throws Ex\EnvironmentIsBrokenException
+     * @throws Ex\Environment_Is_Broken_Exception
      *
      * @return string
      */
     public static function save_bytes_to_checksummed_ascii_safe_string(
         $header,
-        #[\Sensitive_Parameter]
+        #[\SensitiveParameter]
         $bytes
     )
     {
@@ -176,14 +174,14 @@ final class Encoding
      * @param string $expected_header
      * @param string $string
      *
-     * @throws Ex\EnvironmentIsBrokenException
-     * @throws Ex\BadFormatException
+     * @throws Ex\Environment_Is_Broken_Exception
+     * @throws Ex\Bad_Format_Exception
      *
      * @return string
      */
     public static function load_bytes_from_checksummed_ascii_safe_string(
         $expected_header,
-        #[\Sensitive_Parameter]
+        #[\SensitiveParameter]
         $string
     )
     {
@@ -191,7 +189,7 @@ final class Encoding
         // being a prefix of another type's header, leading to ambiguity.
         Core::ensure_true(Core::our_strlen($expected_header) === self::SERIALIZE_HEADER_BYTES, 'Header must be 4 bytes.');
         /* If you get an exception here when attempting to load from a file, first pass your
-           key to Encoding::trimTrailingWhitespace() to remove newline characters, etc.      */
+           key to Encoding::trim_trailing_whitespace() to remove newline characters, etc.      */
         $bytes = Encoding::hex_to_bin($string);
         /* Make sure we have enough bytes to get the version header and checksum. */
         if (Core::our_strlen($bytes) < self::SERIALIZE_HEADER_BYTES + self::CHECKSUM_BYTE_SIZE) {

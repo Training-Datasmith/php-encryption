@@ -45,7 +45,7 @@ pass that path to `require_once`.
 
     require_once('/var/www/lib/defuse-crypto.phar');
 
-    // ... the Crypto, File, Key, and KeyProtectedByPassword classes are now
+    // ... the Crypto, File, Key, and Key_Protected_By_Password classes are now
     // available ...
 
     // ...

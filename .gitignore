@@ -11,3 +11,5 @@ phpunit.phar.asc
 test/unit/File/tmp
 test/.phpunit.result.cache
 .idea
+/.system-test/
+/.master-baseline-worktree/

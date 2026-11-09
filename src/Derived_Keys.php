@@ -1,10 +1,8 @@
 <?php
-
-declare (strict_types=1);
 namespace Defuse\Crypto;
 
 /**
- * Class DerivedKeys
+ * Class Derived_Keys
  * @package Defuse\Crypto
  */
 final class Derived_Keys
@@ -24,7 +22,7 @@ final class Derived_Keys
      *
      * @return string The raw binary authentication sub-key (KEY_BYTE_SIZE bytes).
      */
-    public function get_authentication_key(): string
+    public function get_authentication_key()
     {
         return $this->akey;
     }
@@ -35,7 +33,7 @@ final class Derived_Keys
      *
      * @return string The raw binary encryption sub-key (KEY_BYTE_SIZE bytes).
      */
-    public function get_encryption_key(): string
+    public function get_encryption_key()
     {
         return $this->ekey;
     }
@@ -46,8 +44,10 @@ final class Derived_Keys
      * @param string $ekey  Raw binary encryption sub-key (output of HKDF).
      */
     public function __construct(
-        #[\SensitiveParameter] string $akey,
-        #[\SensitiveParameter] string $ekey
+        #[\SensitiveParameter]
+        $akey,
+        #[\SensitiveParameter]
+        $ekey
     )
     {
         $this->akey = $akey;

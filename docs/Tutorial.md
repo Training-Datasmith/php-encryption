@@ -93,7 +93,7 @@ The following classes are available for you to use:
 - [Crypto](classes/Crypto.md): Encrypting and decrypting strings.
 - [File](classes/File.md): Encrypting and decrypting files.
 - [Key](classes/Key.md): Represents a secret encryption key.
-- [KeyProtectedByPassword](classes/KeyProtectedByPassword.md): Represents
+- [Key_Protected_By_Password](classes/Key_Protected_By_Password.md): Represents
   a secret encryption key that needs to be "unlocked" by a password before it
   can be used.
 
@@ -130,8 +130,8 @@ use Defuse\Crypto\Key;
 
 function loadEncryptionKeyFromConfig()
 {
-    $keyAscii = // ... load the contents of /etc/daveapp-secret-key.txt
-    return Key::loadFromAsciiSafeString($keyAscii);
+    $key_ascii = // ... load the contents of /etc/daveapp-secret-key.txt
+    return Key::load_from_ascii_safe_string($key_ascii);
 }
 ```
 
@@ -162,7 +162,7 @@ $key = loadEncryptionKeyFromConfig();
 $ciphertext = // ... load $ciphertext from the database
 try {
     $secret_data = Crypto::decrypt($ciphertext, $key);
-} catch (\Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException $ex) {
+} catch (\Defuse\Crypto\Exception\Wrong_Key_Or_Modified_Ciphertext_Exception $ex) {
     // An attack! Either the wrong key was loaded, or the ciphertext has
     // changed since it was created -- either corrupted in the database or
     // intentionally modified by Eve trying to carry out an attack.
@@ -203,26 +203,26 @@ users' credit card numbers using a key made from their login password. Then, as
 long as the users all have strong passwords, and they are never logged in during
 the exposure window, their credit cards will be protected from the attacker.
 
-To implement this, Dave will use the `KeyProtectedByPassword` class. When a new
+To implement this, Dave will use the `Key_Protected_By_Password` class. When a new
 user account is created, Dave will save a new key to their account, one that's
 protected by their login password:
 
 ```php
 <?php
-use Defuse\Crypto\KeyProtectedByPassword;
+use Defuse\Crypto\Key_Protected_By_Password;
 
 function CreateUserAccount($username, $password)
 {
     // ... other user account creation stuff, including password hashing
 
-    $protected_key = KeyProtectedByPassword::createRandomPasswordProtectedKey($password);
-    $protected_key_encoded = $protected_key->saveToAsciiSafeString();
+    $protected_key = Key_Protected_By_Password::create_random_password_protected_key($password);
+    $protected_key_encoded = $protected_key->save_to_ascii_safe_string();
     // ... save $protected_key_encoded into the user's account record
 }
 ```
 
-**WARNING:** Because of the way `KeyProtectedByPassword` is implemented, knowing
-`SHA256($password)` is enough to decrypt a `KeyProtectedByPassword`. To be
+**WARNING:** Because of the way `Key_Protected_By_Password` is implemented, knowing
+`SHA256($password)` is enough to decrypt a `Key_Protected_By_Password`. To be
 secure, your application MUST NOT EVER compute `SHA256($password)` and use or
 store it for any reason. You must also make sure that other libraries your
 application is using don't compute it either.
@@ -236,15 +236,15 @@ even if they were never logged in during the attack.
 
 ```php
 <?php
-use Defuse\Crypto\KeyProtectedByPassword;
+use Defuse\Crypto\Key_Protected_By_Password;
 
 // ... authenticate the user using a good password hashing scheme
 // keep the user's password in $password
 
 $protected_key_encoded = // ... load it from the user's account record
-$protected_key = KeyProtectedByPassword::loadFromAsciiSafeString($protected_key_encoded);
-$user_key = $protected_key->unlockKey($password);
-$user_key_encoded = $user_key->saveToAsciiSafeString();
+$protected_key = Key_Protected_By_Password::load_from_ascii_safe_string($protected_key_encoded);
+$user_key = $protected_key->unlock_key($password);
+$user_key_encoded = $user_key->save_to_ascii_safe_string();
 // ... save $user_key_encoded in a cookie
 ```
 
@@ -265,7 +265,7 @@ use Defuse\Crypto\Key;
 // ...
 
 $user_key_encoded = // ... get it out of the cookie ...
-$user_key = Key::loadFromAsciiSafeString($user_key_encoded);
+$user_key = Key::load_from_ascii_safe_string($user_key_encoded);
 
 // ...
 
@@ -284,14 +284,14 @@ use Defuse\Crypto\Key;
 // ...
 
 $user_key_encoded = // ... get it out of the cookie
-$user_key = Key::loadFromAsciiSafeString($user_key_encoded);
+$user_key = Key::load_from_ascii_safe_string($user_key_encoded);
 
 // ...
 
 $encrypted_card_number = // ... load it from the database ...
 try {
     $credit_card_number = Crypto::decrypt($encrypted_card_number, $user_key);
-} catch (Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException $ex) {
+} catch (Defuse\Crypto\Exception\Wrong_Key_Or_Modified_Ciphertext_Exception $ex) {
     // Either there's a bug in our code, we're trying to decrypt with the
     // wrong key, or the encrypted credit card number was corrupted in the
     // database.

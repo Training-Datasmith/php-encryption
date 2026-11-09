@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-use Defuse\Crypto\RuntimeTests;
+use Defuse\Crypto\Runtime_Tests;
 use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
-class RuntimeTestTest extends TestCase
+class Runtime_Test_Test extends TestCase
 {
-    public function testRuntimeTest()
+    public function test_runtime_test()
     {
-        RuntimeTests::runtimeTest();
+        Runtime_Tests::runtime_test();
     }
 }

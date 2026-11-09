@@ -1,14 +1,12 @@
 <?php
-
-declare (strict_types=1);
 namespace Defuse\Crypto;
 
 use Defuse\Crypto\Exception as Ex;
 final class Key_Or_Password
 {
-    public const PBKDF2_ITERATIONS = 100000;
-    public const SECRET_TYPE_KEY = 1;
-    public const SECRET_TYPE_PASSWORD = 2;
+    const PBKDF2_ITERATIONS = 100000;
+    const SECRET_TYPE_KEY = 1;
+    const SECRET_TYPE_PASSWORD = 2;
     /**
      * @var int
      */
@@ -24,7 +22,7 @@ final class Key_Or_Password
      *
      * @return self
      */
-    public static function create_from_key(Key $key): self
+    public static function create_from_key(Key $key)
     {
         return new Key_Or_Password(self::SECRET_TYPE_KEY, $key);
     }
@@ -36,9 +34,9 @@ final class Key_Or_Password
      * @return self
      */
     public static function create_from_password(
-        #[\Sensitive_Parameter]
-        string $password
-    ): self {
+        #[\SensitiveParameter]
+        $password
+    ) {
         return new Key_Or_Password(self::SECRET_TYPE_PASSWORD, $password);
     }
     /**
@@ -62,7 +60,7 @@ final class Key_Or_Password
      *
      * @return Derived_Keys The two derived sub-keys.
      */
-    public function derive_keys(string $salt): Derived_Keys
+    public function derive_keys($salt)
     {
         Core::ensure_true(Core::our_strlen($salt) === Core::SALT_BYTE_SIZE, 'Bad salt.');
         if ($this->secret_type === self::SECRET_TYPE_KEY) {
@@ -103,14 +101,14 @@ final class Key_Or_Password
         throw new Ex\Environment_Is_Broken_Exception('Bad secret type.');
     }
     /**
-     * Constructor for KeyOrPassword.
+     * Constructor for Key_Or_Password.
      *
      * @param int   $secret_type
      * @param mixed $secret      (either a Key or a password string)
      */
     private function __construct(
         $secret_type,
-        #[\Sensitive_Parameter]
+        #[\SensitiveParameter]
         $secret
     )
     {

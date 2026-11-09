@@ -1,13 +1,11 @@
 <?php
-
-declare (strict_types=1);
 namespace Defuse\Crypto;
 
 use Defuse\Crypto\Exception as Ex;
 /*
  * We're using static class inheritance to get access to protected methods
  * inside Crypto. To make it easy to know where the method we're calling can be
- * found, within this file, prefix calls with `Crypto::` or `RuntimeTests::`,
+ * found, within this file, prefix calls with `Crypto::` or `Runtime_Tests::`,
  * and don't use `self::`.
  */
 class Runtime_Tests extends Crypto
@@ -15,7 +13,7 @@ class Runtime_Tests extends Crypto
     /**
      * Runs the runtime tests.
      *
-     * @throws Ex\EnvironmentIsBrokenException
+     * @throws Ex\Environment_Is_Broken_Exception
      * @return void
      */
     public static function runtime_test()
@@ -60,7 +58,7 @@ class Runtime_Tests extends Crypto
     /**
      * High-level tests of Crypto operations.
      *
-     * @throws Ex\EnvironmentIsBrokenException
+     * @throws Ex\Environment_Is_Broken_Exception
      * @return void
      */
     private static function test_encrypt_decrypt()
@@ -73,7 +71,7 @@ class Runtime_Tests extends Crypto
             $decrypted = Crypto::decrypt($ciphertext, $key, true);
         } catch (Ex\Wrong_Key_Or_Modified_Ciphertext_Exception $ex) {
             // It's important to catch this and change it into a
-            // Ex\EnvironmentIsBrokenException, otherwise a test failure could trick
+            // Ex\Environment_Is_Broken_Exception, otherwise a test failure could trick
             // the user into thinking it's just an invalid ciphertext!
             throw new Ex\Environment_Is_Broken_Exception();
         }
@@ -128,7 +126,7 @@ class Runtime_Tests extends Crypto
     /**
      * Test HKDF against test vectors.
      *
-     * @throws Ex\EnvironmentIsBrokenException
+     * @throws Ex\Environment_Is_Broken_Exception
      * @return void
      */
     private static function hkdf_test_vector()
@@ -152,7 +150,7 @@ class Runtime_Tests extends Crypto
     /**
      * Test HMAC against test vectors.
      *
-     * @throws Ex\EnvironmentIsBrokenException
+     * @throws Ex\Environment_Is_Broken_Exception
      * @return void
      */
     private static function hmac_test_vector()
@@ -166,7 +164,7 @@ class Runtime_Tests extends Crypto
     /**
      * Test AES against test vectors.
      *
-     * @throws Ex\EnvironmentIsBrokenException
+     * @throws Ex\Environment_Is_Broken_Exception
      * @return void
      */
     private static function aes_test_vector()

@@ -17,7 +17,7 @@ This means that for all of your old version 1.2 keys, you'll have to:
     1. Decrypt the ciphertext using the old version 1.2 key.
     2. Re-encrypt it using the new version 2.0.0 key.
 
-Use the special `Crypto::legacyDecrypt()` method to decrypt the old ciphertexts
+Use the special `Crypto::legacy_decrypt()` method to decrypt the old ciphertexts
 using the old key and then re-encrypt them using `Crypto::encrypt()` with the
 new key. Your code will look something like the following. To avoid data loss,
 securely back up your keys and data before running your upgrade code.
@@ -31,13 +31,13 @@ securely back up your keys and data before running your upgrade code.
     $legacy_key = // ... get the key to decrypt this ciphertext ...
 
     // Generate the new key that we'll re-encrypt the ciphertext with.
-    $new_key = Key::createNewRandomKey();
+    $new_key = Key::create_new_random_key();
     // ... save it somewhere ...
 
     // Decrypt it.
     try {
-        $plaintext = Crypto::legacyDecrypt($legacy_ciphertext, $legacy_key);
-    } catch (Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException $ex)
+        $plaintext = Crypto::legacy_decrypt($legacy_ciphertext, $legacy_key);
+    } catch (Defuse\Crypto\Exception\Wrong_Key_Or_Modified_Ciphertext_Exception $ex)
     {
         // ... TODO: handle this case appropriately ...
     }

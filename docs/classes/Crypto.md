@@ -36,7 +36,7 @@ recover the plaintext.
 
 **Exceptions:**
 
-- `Defuse\Crypto\Exception\EnvironmentIsBrokenException` is thrown either when
+- `Defuse\Crypto\Exception\Environment_Is_Broken_Exception` is thrown either when
   the platform the code is running on cannot safely perform encryption for some
   reason (e.g. it lacks a secure random number generator), or the runtime tests
   detected a bug in this library.
@@ -90,12 +90,12 @@ been produced except by someone with knowledge of `$key`.
 
 **Exceptions:**
 
-- `Defuse\Crypto\Exception\EnvironmentIsBrokenException` is thrown either when
+- `Defuse\Crypto\Exception\Environment_Is_Broken_Exception` is thrown either when
   the platform the code is running on cannot safely perform encryption for some
   reason (e.g. it lacks a secure random number generator), or the runtime tests
   detected a bug in this library.
 
-- `Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException` is thrown if
+- `Defuse\Crypto\Exception\Wrong_Key_Or_Modified_Ciphertext_Exception` is thrown if
   the `$key` is not the correct key for the given ciphertext, or if the
   ciphertext has been modified (possibly maliciously). There is no way to
   distinguish between these two cases.
@@ -116,7 +116,7 @@ a modified (corrupted) ciphertext. It is up to the caller how to best deal with
 this ambiguity, as it depends on the application this library is being used in.
 If in doubt, consult with a professional cryptographer.
 
-### Crypto::encryptWithPassword($plaintext, $password, $raw\_binary = false)
+### Crypto::encrypt_with_password($plaintext, $password, $raw\_binary = false)
 
 **Description:**
 
@@ -137,7 +137,7 @@ decrypt the ciphertext and recover the plaintext.
 
 **Exceptions:**
 
-- `Defuse\Crypto\Exception\EnvironmentIsBrokenException` is thrown either when
+- `Defuse\Crypto\Exception\Environment_Is_Broken_Exception` is thrown either when
   the platform the code is running on cannot safely perform encryption for some
   reason (e.g. it lacks a secure random number generator), or the runtime tests
   detected a bug in this library.
@@ -150,7 +150,7 @@ This method is intentionally slow, using a lot of CPU resources for a fraction
 of a second. It applies key stretching to the password in order to make password
 guessing attacks more computationally expensive. If you need a faster way to
 encrypt multiple ciphertexts under the same password, see the
-`KeyProtectedByPassword` class.
+`Key_Protected_By_Password` class.
 
 This method runs a small and very fast set of self-tests if it is the very first
 time one of the `Crypto` methods has been called. The performance overhead is
@@ -164,7 +164,7 @@ value of `$password` may be leaked out to an attacker through the stack trace.
 We recommend configuring PHP to never output stack traces (either displaying
 them to the user or saving them to log files).
 
-### Crypto::decryptWithPassword($ciphertext, $password, $raw\_binary = false)
+### Crypto::decrypt_with_password($ciphertext, $password, $raw\_binary = false)
 
 **Description:**
 
@@ -175,23 +175,23 @@ Decrypts a ciphertext string using a secret password.
 1. `$ciphertext` is the ciphertext to be decrypted.
 2. `$password` is a string containing the secret password used for decryption.
 3. `$raw_binary` must have the same value as the `$raw_binary` given to the
-   call to `encryptWithPassword()` that generated `$ciphertext`.
+   call to `encrypt_with_password()` that generated `$ciphertext`.
 
 **Return value:**
 
 If the decryption succeeds, returns a string containing the same value as the
-string that was passed to `encryptWithPassword()` when `$ciphertext` was
+string that was passed to `encrypt_with_password()` when `$ciphertext` was
 produced. Upon a successful return, the caller can be assured that `$ciphertext`
 could not have been produced except by someone with knowledge of `$password`.
 
 **Exceptions:**
 
-- `Defuse\Crypto\Exception\EnvironmentIsBrokenException` is thrown either when
+- `Defuse\Crypto\Exception\Environment_Is_Broken_Exception` is thrown either when
   the platform the code is running on cannot safely perform encryption for some
   reason (e.g. it lacks a secure random number generator), or the runtime tests
   detected a bug in this library.
 
-- `Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException` is thrown if
+- `Defuse\Crypto\Exception\Wrong_Key_Or_Modified_Ciphertext_Exception` is thrown if
   the `$password` is not the correct password for the given ciphertext, or if
   the ciphertext has been modified (possibly maliciously). There is no way to
   distinguish between these two cases.
@@ -203,7 +203,7 @@ could not have been produced except by someone with knowledge of `$password`.
 This method is intentionally slow. It applies key stretching to the password in
 order to make password guessing attacks more computationally expensive. If you
 need a faster way to encrypt multiple ciphertexts under the same password, see
-the `KeyProtectedByPassword` class.
+the `Key_Protected_By_Password` class.
 
 This method runs a small and very fast set of self-tests if it is the very first
 time one of the `Crypto` methods has been called. The performance overhead is
@@ -223,7 +223,7 @@ a modified (corrupted) ciphertext. It is up to the caller how to best deal with
 this ambiguity, as it depends on the application this library is being used in.
 If in doubt, consult with a professional cryptographer.
 
-### Crypto::legacyDecrypt($ciphertext, $key)
+### Crypto::legacy_decrypt($ciphertext, $key)
 
 **Description:**
 
@@ -246,12 +246,12 @@ someone with knowledge of `$key`.
 
 **Exceptions:**
 
-- `Defuse\Crypto\Exception\EnvironmentIsBrokenException` is thrown either when
+- `Defuse\Crypto\Exception\Environment_Is_Broken_Exception` is thrown either when
   the platform the code is running on cannot safely perform encryption for some
   reason (e.g. it lacks a secure random number generator), or the runtime tests
   detected a bug in this library.
 
-- `Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException` is thrown if
+- `Defuse\Crypto\Exception\Wrong_Key_Or_Modified_Ciphertext_Exception` is thrown if
   the `$key` is not the correct key for the given ciphertext, or if the
   ciphertext has been modified (possibly maliciously). There is no way to
   distinguish between these two cases.

@@ -1,6 +1,4 @@
 <?php
-
-declare (strict_types=1);
 namespace Defuse\Crypto;
 
 use Defuse\Crypto\Exception as Ex;
@@ -9,12 +7,12 @@ final class File
     /**
      * Encrypts the input file, saving the ciphertext to the output file.
      *
-     * @param string $inputFilename
-     * @param string $outputFilename
+     * @param string $input_filename
+     * @param string $output_filename
      * @return void
      *
-     * @throws Ex\EnvironmentIsBrokenException
-     * @throws Ex\IOException
+     * @throws Ex\Environment_Is_Broken_Exception
+     * @throws Ex\Io_Exception
      */
     public static function encrypt_file($input_filename, $output_filename, Key $key)
     {
@@ -24,18 +22,18 @@ final class File
      * Encrypts a file with a password, using a slow key derivation function to
      * make password cracking more expensive.
      *
-     * @param string $inputFilename
-     * @param string $outputFilename
+     * @param string $input_filename
+     * @param string $output_filename
      * @param string $password
      * @return void
      *
-     * @throws Ex\EnvironmentIsBrokenException
-     * @throws Ex\IOException
+     * @throws Ex\Environment_Is_Broken_Exception
+     * @throws Ex\Io_Exception
      */
     public static function encrypt_file_with_password(
         $input_filename,
         $output_filename,
-        #[\Sensitive_Parameter]
+        #[\SensitiveParameter]
         $password
     )
     {
@@ -44,13 +42,13 @@ final class File
     /**
      * Decrypts the input file, saving the plaintext to the output file.
      *
-     * @param string $inputFilename
-     * @param string $outputFilename
+     * @param string $input_filename
+     * @param string $output_filename
      * @return void
      *
-     * @throws Ex\EnvironmentIsBrokenException
-     * @throws Ex\IOException
-     * @throws Ex\WrongKeyOrModifiedCiphertextException
+     * @throws Ex\Environment_Is_Broken_Exception
+     * @throws Ex\Io_Exception
+     * @throws Ex\Wrong_Key_Or_Modified_Ciphertext_Exception
      */
     public static function decrypt_file($input_filename, $output_filename, Key $key)
     {
@@ -60,19 +58,19 @@ final class File
      * Decrypts a file with a password, using a slow key derivation function to
      * make password cracking more expensive.
      *
-     * @param string $inputFilename
-     * @param string $outputFilename
+     * @param string $input_filename
+     * @param string $output_filename
      * @param string $password
      * @return void
      *
-     * @throws Ex\EnvironmentIsBrokenException
-     * @throws Ex\IOException
-     * @throws Ex\WrongKeyOrModifiedCiphertextException
+     * @throws Ex\Environment_Is_Broken_Exception
+     * @throws Ex\Io_Exception
+     * @throws Ex\Wrong_Key_Or_Modified_Ciphertext_Exception
      */
     public static function decrypt_file_with_password(
         $input_filename,
         $output_filename,
-        #[\Sensitive_Parameter]
+        #[\SensitiveParameter]
         $password
     )
     {
@@ -82,12 +80,12 @@ final class File
      * Takes two resource handles and encrypts the contents of the first,
      * writing the ciphertext into the second.
      *
-     * @param resource $inputHandle
-     * @param resource $outputHandle
+     * @param resource $input_handle
+     * @param resource $output_handle
      * @return void
      *
-     * @throws Ex\EnvironmentIsBrokenException
-     * @throws Ex\WrongKeyOrModifiedCiphertextException
+     * @throws Ex\Environment_Is_Broken_Exception
+     * @throws Ex\Wrong_Key_Or_Modified_Ciphertext_Exception
      */
     public static function encrypt_resource($input_handle, $output_handle, Key $key)
     {
@@ -98,19 +96,19 @@ final class File
      * password, using a slow key derivation function to make password cracking
      * more expensive.
      *
-     * @param resource $inputHandle
-     * @param resource $outputHandle
+     * @param resource $input_handle
+     * @param resource $output_handle
      * @param string   $password
      * @return void
      *
-     * @throws Ex\EnvironmentIsBrokenException
-     * @throws Ex\IOException
-     * @throws Ex\WrongKeyOrModifiedCiphertextException
+     * @throws Ex\Environment_Is_Broken_Exception
+     * @throws Ex\Io_Exception
+     * @throws Ex\Wrong_Key_Or_Modified_Ciphertext_Exception
      */
     public static function encrypt_resource_with_password(
         $input_handle,
         $output_handle,
-        #[\Sensitive_Parameter]
+        #[\SensitiveParameter]
         $password
     )
     {
@@ -120,13 +118,13 @@ final class File
      * Takes two resource handles and decrypts the contents of the first,
      * writing the plaintext into the second.
      *
-     * @param resource $inputHandle
-     * @param resource $outputHandle
+     * @param resource $input_handle
+     * @param resource $output_handle
      * @return void
      *
-     * @throws Ex\EnvironmentIsBrokenException
-     * @throws Ex\IOException
-     * @throws Ex\WrongKeyOrModifiedCiphertextException
+     * @throws Ex\Environment_Is_Broken_Exception
+     * @throws Ex\Io_Exception
+     * @throws Ex\Wrong_Key_Or_Modified_Ciphertext_Exception
      */
     public static function decrypt_resource($input_handle, $output_handle, Key $key)
     {
@@ -136,19 +134,19 @@ final class File
      * Decrypts the contents of one resource into another with a password, using
      * a slow key derivation function to make password cracking more expensive.
      *
-     * @param resource $inputHandle
-     * @param resource $outputHandle
+     * @param resource $input_handle
+     * @param resource $output_handle
      * @param string   $password
      * @return void
      *
-     * @throws Ex\EnvironmentIsBrokenException
-     * @throws Ex\IOException
-     * @throws Ex\WrongKeyOrModifiedCiphertextException
+     * @throws Ex\Environment_Is_Broken_Exception
+     * @throws Ex\Io_Exception
+     * @throws Ex\Wrong_Key_Or_Modified_Ciphertext_Exception
      */
     public static function decrypt_resource_with_password(
         $input_handle,
         $output_handle,
-        #[\Sensitive_Parameter]
+        #[\SensitiveParameter]
         $password
     )
     {
@@ -157,12 +155,12 @@ final class File
     /**
      * Encrypts a file with either a key or a password.
      *
-     * @param string        $inputFilename
-     * @param string        $outputFilename
+     * @param string        $input_filename
+     * @param string        $output_filename
      * @return void
      *
-     * @throws Ex\CryptoException
-     * @throws Ex\IOException
+     * @throws Ex\Crypto_Exception
+     * @throws Ex\Io_Exception
      */
     private static function encrypt_file_internal($input_filename, $output_filename, Key_Or_Password $secret)
     {
@@ -213,12 +211,12 @@ final class File
     /**
      * Decrypts a file with either a key or a password.
      *
-     * @param string        $inputFilename
-     * @param string        $outputFilename
+     * @param string        $input_filename
+     * @param string        $output_filename
      * @return void
      *
-     * @throws Ex\CryptoException
-     * @throws Ex\IOException
+     * @throws Ex\Crypto_Exception
+     * @throws Ex\Io_Exception
      */
     private static function decrypt_file_internal($input_filename, $output_filename, Key_Or_Password $secret)
     {
@@ -269,12 +267,12 @@ final class File
     /**
      * Encrypts a resource with either a key or a password.
      *
-     * @param resource      $inputHandle
-     * @param resource      $outputHandle
+     * @param resource      $input_handle
+     * @param resource      $output_handle
      * @return void
      *
-     * @throws Ex\EnvironmentIsBrokenException
-     * @throws Ex\IOException
+     * @throws Ex\Environment_Is_Broken_Exception
+     * @throws Ex\Io_Exception
      * @psalm-suppress PossiblyInvalidArgument
      *      Fixes erroneous errors caused by PHP 7.2 switching the return value
      *      of hash_init from a resource to a HashContext.
@@ -349,13 +347,13 @@ final class File
     /**
      * Decrypts a file-backed resource with either a key or a password.
      *
-     * @param resource      $inputHandle
-     * @param resource      $outputHandle
+     * @param resource      $input_handle
+     * @param resource      $output_handle
      * @return void
      *
-     * @throws Ex\EnvironmentIsBrokenException
-     * @throws Ex\IOException
-     * @throws Ex\WrongKeyOrModifiedCiphertextException
+     * @throws Ex\Environment_Is_Broken_Exception
+     * @throws Ex\Io_Exception
+     * @throws Ex\Wrong_Key_Or_Modified_Ciphertext_Exception
      * @psalm-suppress PossiblyInvalidArgument
      *      Fixes erroneous errors caused by PHP 7.2 switching the return value
      *      of hash_init from a resource to a HashContext.
@@ -513,8 +511,8 @@ final class File
      * @param int      $num_bytes
      * @return string
      *
-     * @throws Ex\IOException
-     * @throws Ex\EnvironmentIsBrokenException
+     * @throws Ex\Io_Exception
+     * @throws Ex\Environment_Is_Broken_Exception
      */
     public static function read_bytes($stream, $num_bytes)
     {
@@ -546,7 +544,7 @@ final class File
      * @param int      $num_bytes
      * @return int
      *
-     * @throws Ex\IOException
+     * @throws Ex\Io_Exception
      */
     public static function write_bytes($stream, $buf, $num_bytes = null)
     {
@@ -586,11 +584,11 @@ final class File
         return $error['message'];
     }
     /**
-     * PHPUnit sets an error handler, which prevents getLastErrorMessage() from working,
+     * PHPUnit sets an error handler, which prevents get_last_error_message() from working,
      * because error_get_last does not work when custom handlers are set.
      *
      * This is a workaround, which should be a no-op in production deployments, to make
-     * getLastErrorMessage() return the error messages that the PHPUnit tests expect.
+     * get_last_error_message() return the error messages that the PHPUnit tests expect.
      *
      * If, in a production deployment, a custom error handler is set, the exception
      * handling will still work as usual, but the error messages will be confusing.
@@ -604,7 +602,7 @@ final class File
         }
     }
     /**
-     * Undoes what removePHPUnitErrorHandler did.
+     * Undoes what remove_php_unit_error_handler did.
      *
      * @return void
      */

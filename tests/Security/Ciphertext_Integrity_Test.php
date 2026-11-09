@@ -16,10 +16,12 @@ use PHPUnit\Framework\TestCase;
  * pipeline hold: authenticate-then-decrypt, tamper detection, key isolation,
  * and correct error handling.
  */
-class CiphertextIntegrityTest extends TestCase
+class Ciphertext_Integrity_Test extends TestCase
 {
-    private Key $key;
-    private Key $wrong_key;
+    /** @var Key */
+    private $key;
+    /** @var Key */
+    private $wrong_key;
 
     protected function setUp(): void
     {

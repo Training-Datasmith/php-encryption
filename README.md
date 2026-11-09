@@ -56,7 +56,7 @@ documentation for each of the classes this library provides:
 - [Crypto](docs/classes/Crypto.md)
 - [File](docs/classes/File.md)
 - [Key](docs/classes/Key.md)
-- [KeyProtectedByPassword](docs/classes/KeyProtectedByPassword.md)
+- [Key_Protected_By_Password](docs/classes/Key_Protected_By_Password.md)
 
 If you encounter difficulties, see the [FAQ](docs/FAQ.md) answers. The fixes to
 the most commonly-reported problems are explained there.

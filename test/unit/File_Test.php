@@ -6,7 +6,7 @@ namespace Defuse\Crypto;
 
 use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
-class FileTest extends TestCase
+class File_Test extends TestCase
 {
     private $key;
     private static $FILE_DIR;
@@ -20,7 +20,7 @@ class FileTest extends TestCase
             mkdir(self::$TEMP_DIR);
         }
 
-        $this->key = Key::createNewRandomKey();
+        $this->key = Key::create_new_random_key();
     }
 
     public function tear_down()
@@ -32,20 +32,20 @@ class FileTest extends TestCase
     /**
      * Test encryption from one file name to a destination file name
      *
-     * @dataProvider fileToFileProvider
+     * @dataProvider file_to_file_provider
      *
-     * @param string $srcName source file name
+     * @param string $src_name source file name
      */
-    public function testFileToFile($srcName)
+    public function test_file_to_file($src_name)
     {
-        $src = self::$FILE_DIR . '/' . $srcName;
+        $src = self::$FILE_DIR . '/' . $src_name;
 
         $dest1  = self::$TEMP_DIR . '/ff1';
-        File::encryptFile($src, $dest1, $this->key);
+        File::encrypt_file($src, $dest1, $this->key);
         $this->assertFileExists($dest1, 'destination file not created.');
 
         $reverse1 = self::$TEMP_DIR . '/rv1';
-        File::decryptFile($dest1, $reverse1, $this->key);
+        File::decrypt_file($dest1, $reverse1, $this->key);
         $this->assertFileExists($reverse1);
         $this->assertSame(
             md5_file($src),
@@ -54,7 +54,7 @@ class FileTest extends TestCase
         );
 
         $dest2  = self::$TEMP_DIR . '/ff2';
-        File::encryptFile($reverse1, $dest2, $this->key);
+        File::encrypt_file($reverse1, $dest2, $this->key);
         $this->assertFileExists($dest2);
 
         $this->assertNotEquals(
@@ -64,7 +64,7 @@ class FileTest extends TestCase
         );
 
         $reverse2 = self::$TEMP_DIR . '/rv2';
-        File::decryptFile($dest2, $reverse2, $this->key);
+        File::decrypt_file($dest2, $reverse2, $this->key);
         $this->assertSame(
             md5_file($src),
             md5_file($reverse2),
@@ -75,20 +75,20 @@ class FileTest extends TestCase
     /**
      * Test encryption from one file name to a destination file name (password).
      *
-     * @dataProvider fileToFileProvider
+     * @dataProvider file_to_file_provider
      *
-     * @param string $srcName source file name
+     * @param string $src_name source file name
      */
-    public function testFileToFileWithPassword($srcName)
+    public function test_file_to_file_with_password($src_name)
     {
-        $src = self::$FILE_DIR . '/' . $srcName;
+        $src = self::$FILE_DIR . '/' . $src_name;
 
         $dest1  = self::$TEMP_DIR . '/ff1';
-        File::encryptFileWithPassword($src, $dest1, 'password');
+        File::encrypt_file_with_password($src, $dest1, 'password');
         $this->assertFileExists($dest1, 'destination file not created.');
 
         $reverse1 = self::$TEMP_DIR . '/rv1';
-        File::decryptFileWithPassword($dest1, $reverse1, 'password');
+        File::decrypt_file_with_password($dest1, $reverse1, 'password');
         $this->assertFileExists($reverse1);
         $this->assertSame(
             md5_file($src),
@@ -97,7 +97,7 @@ class FileTest extends TestCase
         );
 
         $dest2  = self::$TEMP_DIR . '/ff2';
-        File::encryptFileWithPassword($reverse1, $dest2, 'password');
+        File::encrypt_file_with_password($reverse1, $dest2, 'password');
         $this->assertFileExists($dest2);
 
         $this->assertNotEquals(
@@ -107,7 +107,7 @@ class FileTest extends TestCase
         );
 
         $reverse2 = self::$TEMP_DIR . '/rv2';
-        File::decryptFileWithPassword($dest2, $reverse2, 'password');
+        File::decrypt_file_with_password($dest2, $reverse2, 'password');
         $this->assertSame(
             md5_file($src),
             md5_file($reverse2),
@@ -116,18 +116,18 @@ class FileTest extends TestCase
     }
 
     /**
-     * @dataProvider fileToFileProvider
+     * @dataProvider file_to_file_provider
      *
      * @param string $src source handle
      */
-    public function testResourceToResource($srcFile)
+    public function test_resource_to_resource($src_file)
     {
-        $srcName  = self::$FILE_DIR . '/' . $srcFile;
-        $destName = self::$TEMP_DIR . "/$srcFile.dest";
-        $src      = fopen($srcName, 'r');
+        $src_path = self::$FILE_DIR . '/' . $src_file;
+        $destName = self::$TEMP_DIR . "/$src_file.dest";
+        $src      = fopen($src_path, 'r');
         $dest     = fopen($destName, 'w');
 
-        File::encryptResource($src, $dest, $this->key);
+        File::encrypt_resource($src, $dest, $this->key);
 
         fclose($src);
         fclose($dest);
@@ -135,30 +135,30 @@ class FileTest extends TestCase
         $src2  = fopen($destName, 'r');
         $dest2 = fopen(self::$TEMP_DIR . '/dest2', 'w');
 
-        File::decryptResource($src2, $dest2, $this->key);
+        File::decrypt_resource($src2, $dest2, $this->key);
         fclose($src2);
         fclose($dest2);
 
         $this->assertSame(
-            md5_file($srcName),
+            md5_file($src_path),
             md5_file(self::$TEMP_DIR . '/dest2'),
             'Original file mismatches the result of encrypt and decrypt'
         );
     }
 
     /**
-     * @dataProvider fileToFileProvider
+     * @dataProvider file_to_file_provider
      *
      * @param string $src source handle
      */
-    public function testResourceToResourceWithPassword($srcFile)
+    public function test_resource_to_resource_with_password($src_file)
     {
-        $srcName  = self::$FILE_DIR . '/' . $srcFile;
-        $destName = self::$TEMP_DIR . "/$srcFile.dest";
-        $src      = fopen($srcName, 'r');
+        $src_path = self::$FILE_DIR . '/' . $src_file;
+        $destName = self::$TEMP_DIR . "/$src_file.dest";
+        $src      = fopen($src_path, 'r');
         $dest     = fopen($destName, 'w');
 
-        File::encryptResourceWithPassword($src, $dest, 'password');
+        File::encrypt_resource_with_password($src, $dest, 'password');
 
         fclose($src);
         fclose($dest);
@@ -166,38 +166,38 @@ class FileTest extends TestCase
         $src2  = fopen($destName, 'r');
         $dest2 = fopen(self::$TEMP_DIR . '/dest2', 'w');
 
-        File::decryptResourceWithPassword($src2, $dest2, 'password');
+        File::decrypt_resource_with_password($src2, $dest2, 'password');
         fclose($src2);
         fclose($dest2);
 
         $this->assertSame(
-            md5_file($srcName),
+            md5_file($src_path),
             md5_file(self::$TEMP_DIR . '/dest2'),
             'Original file mismatches the result of encrypt and decrypt'
         );
     }
 
-    public function testDecryptBadMagicNumber()
+    public function test_decrypt_bad_magic_number()
     {
         $junk = self::$TEMP_DIR . '/junk';
         file_put_contents($junk, 'This file does not have the right magic number.');
-        $this->expectException(\Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException::class);
+        $this->expectException(\Defuse\Crypto\Exception\Wrong_Key_Or_Modified_Ciphertext_Exception::class);
         $this->expectExceptionMessage('Input file is too small to have been created by this library.');
-        File::decryptFile($junk, self::$TEMP_DIR . '/unjunked', $this->key);
+        File::decrypt_file($junk, self::$TEMP_DIR . '/unjunked', $this->key);
     }
 
     /**
-     * @dataProvider garbageCiphertextProvider
+     * @dataProvider garbage_ciphertext_provider
      */
-    public function testDecryptGarbage($ciphertext)
+    public function test_decrypt_garbage($ciphertext)
     {
         $junk = self::$TEMP_DIR . '/junk';
         file_put_contents($junk, $ciphertext);
-        $this->expectException(\Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException::class);
-        File::decryptFile($junk, self::$TEMP_DIR . '/unjunked', $this->key);
+        $this->expectException(\Defuse\Crypto\Exception\Wrong_Key_Or_Modified_Ciphertext_Exception::class);
+        File::decrypt_file($junk, self::$TEMP_DIR . '/unjunked', $this->key);
     }
 
-    public static function garbageCiphertextProvider()
+    public static function garbage_ciphertext_provider()
     {
         $ciphertexts = [
             [str_repeat('this is not anything that can be decrypted.', 100)],
@@ -208,15 +208,15 @@ class FileTest extends TestCase
         return $ciphertexts;
     }
 
-    public function testDecryptEmptyFile()
+    public function test_decrypt_empty_file()
     {
         $junk = self::$TEMP_DIR . '/junk';
         file_put_contents($junk, '');
-        $this->expectException(\Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException::class);
-        File::decryptFile($junk, self::$TEMP_DIR . '/unjunked', $this->key);
+        $this->expectException(\Defuse\Crypto\Exception\Wrong_Key_Or_Modified_Ciphertext_Exception::class);
+        File::decrypt_file($junk, self::$TEMP_DIR . '/unjunked', $this->key);
     }
 
-    public function testDecryptTruncatedCiphertext()
+    public function test_decrypt_truncated_ciphertext()
     {
         // This tests for issue #115 on GitHub.
         $plaintext_path  = self::$TEMP_DIR . '/plaintext';
@@ -224,180 +224,180 @@ class FileTest extends TestCase
         $truncated_path  = self::$TEMP_DIR . '/truncated';
 
         file_put_contents($plaintext_path, str_repeat('A', 1024));
-        File::encryptFile($plaintext_path, $ciphertext_path, $this->key);
+        File::encrypt_file($plaintext_path, $ciphertext_path, $this->key);
 
         $ciphertext = file_get_contents($ciphertext_path);
         $truncated  = substr($ciphertext, 0, 64);
         file_put_contents($truncated_path, $truncated);
 
-        $this->expectException(\Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException::class);
-        File::decryptFile($truncated_path, $plaintext_path, $this->key);
+        $this->expectException(\Defuse\Crypto\Exception\Wrong_Key_Or_Modified_Ciphertext_Exception::class);
+        File::decrypt_file($truncated_path, $plaintext_path, $this->key);
     }
 
-    public function testEncryptWithCryptoDecryptWithFile()
+    public function test_encrypt_with_crypto_decrypt_with_file()
     {
         $ciphertext_path = self::$TEMP_DIR . '/ciphertext';
         $plaintext_path  = self::$TEMP_DIR . '/plaintext';
 
-        $key        = Key::createNewRandomKey();
+        $key        = Key::create_new_random_key();
         $plaintext  = 'Plaintext!';
         $ciphertext = Crypto::encrypt($plaintext, $key, true);
         file_put_contents($ciphertext_path, $ciphertext);
 
-        File::decryptFile($ciphertext_path, $plaintext_path, $key);
+        File::decrypt_file($ciphertext_path, $plaintext_path, $key);
 
         $plaintext_decrypted = file_get_contents($plaintext_path);
         $this->assertSame($plaintext, $plaintext_decrypted);
     }
 
-    public function testEncryptWithFileDecryptWithCrypto()
+    public function test_encrypt_with_file_decrypt_with_crypto()
     {
         $ciphertext_path = self::$TEMP_DIR . '/ciphertext';
         $plaintext_path  = self::$TEMP_DIR . '/plaintext';
 
-        $key       = Key::createNewRandomKey();
+        $key       = Key::create_new_random_key();
         $plaintext = 'Plaintext!';
         file_put_contents($plaintext_path, $plaintext);
-        File::encryptFile($plaintext_path, $ciphertext_path, $key);
+        File::encrypt_file($plaintext_path, $ciphertext_path, $key);
 
         $ciphertext          = file_get_contents($ciphertext_path);
         $plaintext_decrypted = Crypto::decrypt($ciphertext, $key, true);
         $this->assertSame($plaintext, $plaintext_decrypted);
     }
 
-    public function testExtraData()
+    public function test_extra_data()
     {
         $src  = self::$FILE_DIR . '/wat-gigantic-duck.jpg';
         $dest = self::$TEMP_DIR . '/err';
 
-        File::encryptFile($src, $dest, $this->key);
+        File::encrypt_file($src, $dest, $this->key);
 
         file_put_contents($dest, str_repeat('A', 2048), FILE_APPEND);
 
-        $this->expectException(\Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException::class);
+        $this->expectException(\Defuse\Crypto\Exception\Wrong_Key_Or_Modified_Ciphertext_Exception::class);
         $this->expectExceptionMessage('Integrity check failed.');
-        File::decryptFile($dest, $dest . '.jpg', $this->key);
+        File::decrypt_file($dest, $dest . '.jpg', $this->key);
     }
 
-    public function testFileCreateRandomKey()
+    public function test_file_create_random_key()
     {
-        $result = Key::createNewRandomKey();
+        $result = Key::create_new_random_key();
         $this->assertInstanceOf('\Defuse\Crypto\Key', $result);
     }
 
-    public function testBadSourcePathEncrypt()
+    public function test_bad_source_path_encrypt()
     {
-        $this->expectException(\Defuse\Crypto\Exception\IOException::class);
+        $this->expectException(\Defuse\Crypto\Exception\Io_Exception::class);
         $this->expectExceptionMessage('No such file or directory');
-        File::encryptFile('./i-do-not-exist', 'output-file', $this->key);
+        File::encrypt_file('./i-do-not-exist', 'output-file', $this->key);
     }
 
-    public function testBadSourcePathDecrypt()
+    public function test_bad_source_path_decrypt()
     {
-        $this->expectException(\Defuse\Crypto\Exception\IOException::class);
+        $this->expectException(\Defuse\Crypto\Exception\Io_Exception::class);
         $this->expectExceptionMessage('No such file or directory');
-        File::decryptFile('./i-do-not-exist', 'output-file', $this->key);
+        File::decrypt_file('./i-do-not-exist', 'output-file', $this->key);
     }
 
-    public function testBadSourcePathEncryptWithPassword()
+    public function test_bad_source_path_encrypt_with_password()
     {
-        $this->expectException(\Defuse\Crypto\Exception\IOException::class);
+        $this->expectException(\Defuse\Crypto\Exception\Io_Exception::class);
         $this->expectExceptionMessage('No such file or directory');
-        File::encryptFileWithPassword('./i-do-not-exist', 'output-file', 'password');
+        File::encrypt_file_with_password('./i-do-not-exist', 'output-file', 'password');
     }
 
-    public function testBadSourcePathDecryptWithPassword()
+    public function test_bad_source_path_decrypt_with_password()
     {
-        $this->expectException(\Defuse\Crypto\Exception\IOException::class);
+        $this->expectException(\Defuse\Crypto\Exception\Io_Exception::class);
         $this->expectExceptionMessage('No such file or directory');
-        File::decryptFileWithPassword('./i-do-not-exist', 'output-file', 'password');
+        File::decrypt_file_with_password('./i-do-not-exist', 'output-file', 'password');
     }
 
-    public function testBadDestinationPathEncrypt()
+    public function test_bad_destination_path_encrypt()
     {
         $src  = self::$FILE_DIR . '/wat-gigantic-duck.jpg';
-        $this->expectException(\Defuse\Crypto\Exception\IOException::class);
+        $this->expectException(\Defuse\Crypto\Exception\Io_Exception::class);
         $this->expectExceptionMessage('Is a directory');
-        File::encryptFile($src, './', $this->key);
+        File::encrypt_file($src, './', $this->key);
     }
 
-    public function testBadDestinationPathDecrypt()
+    public function test_bad_destination_path_decrypt()
     {
         $src  = self::$FILE_DIR . '/wat-gigantic-duck.jpg';
-        $this->expectException(\Defuse\Crypto\Exception\IOException::class);
+        $this->expectException(\Defuse\Crypto\Exception\Io_Exception::class);
         $this->expectExceptionMessage('Is a directory');
-        File::decryptFile($src, './', $this->key);
+        File::decrypt_file($src, './', $this->key);
     }
 
-    public function testBadDestinationPathEncryptWithPassword()
+    public function test_bad_destination_path_encrypt_with_password()
     {
         $src  = self::$FILE_DIR . '/wat-gigantic-duck.jpg';
-        $this->expectException(\Defuse\Crypto\Exception\IOException::class);
+        $this->expectException(\Defuse\Crypto\Exception\Io_Exception::class);
         $this->expectExceptionMessage('Is a directory');
-        File::encryptFileWithPassword($src, './', 'password');
+        File::encrypt_file_with_password($src, './', 'password');
     }
 
-    public function testBadDestinationPathDecryptWithPassword()
+    public function test_bad_destination_path_decrypt_with_password()
     {
         $src  = self::$FILE_DIR . '/wat-gigantic-duck.jpg';
-        $this->expectException(\Defuse\Crypto\Exception\IOException::class);
+        $this->expectException(\Defuse\Crypto\Exception\Io_Exception::class);
         $this->expectExceptionMessage('Is a directory');
-        File::decryptFileWithPassword($src, './', 'password');
+        File::decrypt_file_with_password($src, './', 'password');
     }
 
-    public function testNonResourceInputEncrypt()
+    public function test_non_resource_input_encrypt()
     {
         $resource = fopen('php://memory', 'wb');
-        $this->expectException(\Defuse\Crypto\Exception\IOException::class);
+        $this->expectException(\Defuse\Crypto\Exception\Io_Exception::class);
         $this->expectExceptionMessage('must be a resource');
-        File::encryptResource('not a resource', $resource, $this->key);
+        File::encrypt_resource('not a resource', $resource, $this->key);
         fclose($resource);
     }
 
-    public function testNonResourceOutputEncrypt()
+    public function test_non_resource_output_encrypt()
     {
         $resource = fopen('php://memory', 'wb');
-        $this->expectException(\Defuse\Crypto\Exception\IOException::class);
+        $this->expectException(\Defuse\Crypto\Exception\Io_Exception::class);
         $this->expectExceptionMessage('must be a resource');
-        File::encryptResource($resource, 'not a resource', $this->key);
+        File::encrypt_resource($resource, 'not a resource', $this->key);
         fclose($resource);
     }
 
-    public function testNonResourceInputDecrypt()
+    public function test_non_resource_input_decrypt()
     {
         $resource = fopen('php://memory', 'wb');
-        $this->expectException(\Defuse\Crypto\Exception\IOException::class);
+        $this->expectException(\Defuse\Crypto\Exception\Io_Exception::class);
         $this->expectExceptionMessage('must be a resource');
-        File::decryptResource('not a resource', $resource, $this->key);
+        File::decrypt_resource('not a resource', $resource, $this->key);
         fclose($resource);
     }
 
-    public function testNonResourceOutputDecrypt()
+    public function test_non_resource_output_decrypt()
     {
         $resource = fopen('php://memory', 'wb');
-        $this->expectException(\Defuse\Crypto\Exception\IOException::class);
+        $this->expectException(\Defuse\Crypto\Exception\Io_Exception::class);
         $this->expectExceptionMessage('must be a resource');
-        File::decryptResource($resource, 'not a resource', $this->key);
+        File::decrypt_resource($resource, 'not a resource', $this->key);
         fclose($resource);
     }
 
-    public function testNonFileResourceDecrypt()
+    public function test_non_file_resource_decrypt()
     {
         /* This should behave equivalently to an empty file. Calling fstat() on
             stdin returns a result saying it has zero size. */
         $stdin = fopen('php://stdin', 'r');
         $output = fopen('php://memory', 'wb');
         try {
-            File::decryptResource($stdin, $output, $this->key);
+            File::decrypt_resource($stdin, $output, $this->key);
         } catch (\Exception $ex) {
             fclose($output);
             fclose($stdin);
-            $this->expectException(\Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException::class);
+            $this->expectException(\Defuse\Crypto\Exception\Wrong_Key_Or_Modified_Ciphertext_Exception::class);
             throw $ex;
         }
     }
 
-    public static function fileToFileProvider()
+    public static function file_to_file_provider()
     {
         $data = [];
 

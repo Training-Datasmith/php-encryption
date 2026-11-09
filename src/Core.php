@@ -1,30 +1,28 @@
 <?php
-
-declare (strict_types=1);
 namespace Defuse\Crypto;
 
 use Defuse\Crypto\Exception as Ex;
 final class Core
 {
-    public const HEADER_VERSION_SIZE = 4;
-    public const MINIMUM_CIPHERTEXT_SIZE = 84;
-    public const CURRENT_VERSION = "\xde\xf5\x02\x00";
-    public const CIPHER_METHOD = 'aes-256-ctr';
-    public const BLOCK_BYTE_SIZE = 16;
-    public const KEY_BYTE_SIZE = 32;
-    public const SALT_BYTE_SIZE = 32;
-    public const MAC_BYTE_SIZE = 32;
-    public const HASH_FUNCTION_NAME = 'sha256';
-    public const ENCRYPTION_INFO_STRING = 'DefusePHP|V2|KeyForEncryption';
-    public const AUTHENTICATION_INFO_STRING = 'DefusePHP|V2|KeyForAuthentication';
-    public const BUFFER_BYTE_SIZE = 1048576;
-    public const LEGACY_CIPHER_METHOD = 'aes-128-cbc';
-    public const LEGACY_BLOCK_BYTE_SIZE = 16;
-    public const LEGACY_KEY_BYTE_SIZE = 16;
-    public const LEGACY_HASH_FUNCTION_NAME = 'sha256';
-    public const LEGACY_MAC_BYTE_SIZE = 32;
-    public const LEGACY_ENCRYPTION_INFO_STRING = 'DefusePHP|KeyForEncryption';
-    public const LEGACY_AUTHENTICATION_INFO_STRING = 'DefusePHP|KeyForAuthentication';
+    const HEADER_VERSION_SIZE = 4;
+    const MINIMUM_CIPHERTEXT_SIZE = 84;
+    const CURRENT_VERSION = "\xde\xf5\x02\x00";
+    const CIPHER_METHOD = 'aes-256-ctr';
+    const BLOCK_BYTE_SIZE = 16;
+    const KEY_BYTE_SIZE = 32;
+    const SALT_BYTE_SIZE = 32;
+    const MAC_BYTE_SIZE = 32;
+    const HASH_FUNCTION_NAME = 'sha256';
+    const ENCRYPTION_INFO_STRING = 'DefusePHP|V2|KeyForEncryption';
+    const AUTHENTICATION_INFO_STRING = 'DefusePHP|V2|KeyForAuthentication';
+    const BUFFER_BYTE_SIZE = 1048576;
+    const LEGACY_CIPHER_METHOD = 'aes-128-cbc';
+    const LEGACY_BLOCK_BYTE_SIZE = 16;
+    const LEGACY_KEY_BYTE_SIZE = 16;
+    const LEGACY_HASH_FUNCTION_NAME = 'sha256';
+    const LEGACY_MAC_BYTE_SIZE = 32;
+    const LEGACY_ENCRYPTION_INFO_STRING = 'DefusePHP|KeyForEncryption';
+    const LEGACY_AUTHENTICATION_INFO_STRING = 'DefusePHP|KeyForAuthentication';
     /*
      * V2.0 Format: VERSION (4 bytes) || SALT (32 bytes) || IV (16 bytes) ||
      *              CIPHERTEXT (varies) || HMAC (32 bytes)
@@ -48,7 +46,7 @@ final class Core
      * @param int    $inc  The positive integer amount to add to the counter.
      *                     Must be > 0 and ≤ PHP_INT_MAX - 255.
      *
-     * @throws Ex\EnvironmentIsBrokenException if $ctr has wrong length, $inc is non-positive,
+     * @throws Ex\Environment_Is_Broken_Exception if $ctr has wrong length, $inc is non-positive,
      *                                         or integer overflow would occur
      *
      * @return string The incremented counter as a BLOCK_BYTE_SIZE byte string.
@@ -185,7 +183,7 @@ final class Core
      *
      * @security Both strings MUST have the same byte length before calling
      *           this function.  Variable-length comparison is not covered by
-     *           this implementation; an EnvironmentIsBrokenException is thrown
+     *           this implementation; an Environment_Is_Broken_Exception is thrown
      *           if the lengths differ.  This function prevents the HMAC timing
      *           side channel described in CVE-2013-4294 and similar advisories.
      *
@@ -225,7 +223,7 @@ final class Core
      * @param string $name
      * @return void
      *
-     * @throws Ex\EnvironmentIsBrokenException
+     * @throws Ex\Environment_Is_Broken_Exception
      */
     public static function ensure_constant_exists($name)
     {
@@ -237,7 +235,7 @@ final class Core
      * @param string $name
      * @return void
      *
-     * @throws Ex\EnvironmentIsBrokenException
+     * @throws Ex\Environment_Is_Broken_Exception
      */
     public static function ensure_function_exists($name)
     {
@@ -250,7 +248,7 @@ final class Core
      * @param string $message
      * @return void
      *
-     * @throws Ex\EnvironmentIsBrokenException
+     * @throws Ex\Environment_Is_Broken_Exception
      */
     public static function ensure_true($condition, $message = '')
     {
@@ -268,7 +266,7 @@ final class Core
      *
      * @param string $str
      *
-     * @throws Ex\EnvironmentIsBrokenException
+     * @throws Ex\Environment_Is_Broken_Exception
      *
      * @return int
      */
@@ -292,7 +290,7 @@ final class Core
      * @param int    $start
      * @param int    $length
      *
-     * @throws Ex\EnvironmentIsBrokenException
+     * @throws Ex\Environment_Is_Broken_Exception
      *
      * @return string|bool
      */
@@ -323,7 +321,7 @@ final class Core
             }
         }
         if ($length < 0) {
-            throw new \InvalidArgumentException('Negative lengths are not supported with ourSubstr.');
+            throw new \InvalidArgumentException('Negative lengths are not supported with our_substr.');
         }
         if ($exists) {
             $substr = \mb_substr($str, $start, $length, '8bit');
@@ -374,7 +372,7 @@ final class Core
      */
     public static function pbkdf2(
         $algorithm,
-        #[\Sensitive_Parameter]
+        #[\SensitiveParameter]
         $password,
         $salt,
         $count,

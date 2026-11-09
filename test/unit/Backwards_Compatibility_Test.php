@@ -7,12 +7,12 @@ use Defuse\Crypto\Encoding;
 use Defuse\Crypto\Key;
 use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
-class BackwardsCompatibilityTest extends TestCase
+class Backwards_Compatibility_Test extends TestCase
 {
     /* helper function to create a key with raw bytes */
-    public function keyHelper($rawkey)
+    public function key_helper($rawkey)
     {
-        $key = Key::createNewRandomKey();
+        $key = Key::create_new_random_key();
         $func = function ($bytes) {
             $this->key_bytes = $bytes;
         };
@@ -21,9 +21,9 @@ class BackwardsCompatibilityTest extends TestCase
         return $key;
     }
 
-    public function testDecryptLegacyWithWrongMethodStraightUpHex()
+    public function test_decrypt_legacy_with_wrong_method_straight_up_hex()
     {
-        $cipher = Encoding::hexToBin(
+        $cipher = Encoding::hex_to_bin(
             'cfdad83ebd506d2c9ada8d48030d0bca' .
             '2ff94760e6d39c186adb1290d6c47e35' .
             '821e262673c5631c42ebbaf70774d6ef' .
@@ -33,13 +33,13 @@ class BackwardsCompatibilityTest extends TestCase
             '00000000000000000000000000000000'
         );
 
-        $this->expectException(\Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException::class);
+        $this->expectException(\Defuse\Crypto\Exception\Wrong_Key_Or_Modified_Ciphertext_Exception::class);
         $this->expectExceptionMessage('invalid hex encoding');
 
         /* Make it try to parse the binary as hex. */
         $plain = Crypto::decrypt(
             $cipher,
-            $this->keyHelper(
+            $this->key_helper(
                 "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F" .
                 "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F"
             ),
@@ -47,9 +47,9 @@ class BackwardsCompatibilityTest extends TestCase
         );
     }
 
-    public function testDecryptLegacyWithWrongMethodStraightUpBinary()
+    public function test_decrypt_legacy_with_wrong_method_straight_up_binary()
     {
-        $cipher = Encoding::hexToBin(
+        $cipher = Encoding::hex_to_bin(
             'cfdad83ebd506d2c9ada8d48030d0bca' .
             '2ff94760e6d39c186adb1290d6c47e35' .
             '821e262673c5631c42ebbaf70774d6ef' .
@@ -59,13 +59,13 @@ class BackwardsCompatibilityTest extends TestCase
             '00000000000000000000000000000000'
         );
 
-        $this->expectException(\Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException::class);
+        $this->expectException(\Defuse\Crypto\Exception\Wrong_Key_Or_Modified_Ciphertext_Exception::class);
         $this->expectExceptionMessage('Bad version header');
 
         /* This time, treat the binary as binary. */
         $plain = Crypto::decrypt(
             $cipher,
-            $this->keyHelper(
+            $this->key_helper(
                 "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F" .
                 "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F"
             ),

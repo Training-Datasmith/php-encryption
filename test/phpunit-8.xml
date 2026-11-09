@@ -1,4 +1,12 @@
 <phpunit beStrictAboutTestsThatDoNotTestAnything="false">
+    <testsuites>
+        <testsuite name="unit">
+            <directory>unit</directory>
+        </testsuite>
+        <testsuite name="security">
+            <directory>../tests/Security</directory>
+        </testsuite>
+    </testsuites>
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
             <directory suffix=".php">../src</directory>

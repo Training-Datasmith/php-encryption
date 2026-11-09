@@ -21,7 +21,7 @@ src/
     Bad_Format_Exception.php
     Crypto_Exception.php
     Environment_Is_Broken_Exception.php
-    IO_Exception.php
+    Io_Exception.php
     Wrong_Key_Or_Modified_Ciphertext_Exception.php
 ```
 

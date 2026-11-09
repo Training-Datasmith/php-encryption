@@ -1,6 +1,4 @@
 <?php
-
-declare (strict_types=1);
 namespace Defuse\Crypto;
 
 use Defuse\Crypto\Exception as Ex;
@@ -25,7 +23,7 @@ class Crypto
      * @param bool   $raw_binary When true, returns raw binary ciphertext; otherwise
      *                           returns a hex-encoded string safe for text storage.
      *
-     * @throws Ex\EnvironmentIsBrokenException if the runtime crypto environment is broken
+     * @throws Ex\Environment_Is_Broken_Exception if the runtime crypto environment is broken
      * @throws \TypeError if $plaintext is not a string, $key is not a Key, or $raw_binary is not a bool
      *
      * @return string Authenticated ciphertext (hex-encoded unless $raw_binary is true).
@@ -64,7 +62,7 @@ class Crypto
      *                           Must be non-empty; longer and more random is better.
      * @param bool   $raw_binary When true, returns raw binary ciphertext.
      *
-     * @throws Ex\EnvironmentIsBrokenException if the runtime crypto environment is broken
+     * @throws Ex\Environment_Is_Broken_Exception if the runtime crypto environment is broken
      * @throws \TypeError if any argument has the wrong type
      *
      * @return string Authenticated ciphertext (hex-encoded unless $raw_binary is true).
@@ -74,7 +72,7 @@ class Crypto
      */
     public static function encrypt_with_password(
         $plaintext,
-        #[\Sensitive_Parameter]
+        #[\SensitiveParameter]
         $password,
         $raw_binary = false
     )
@@ -109,7 +107,7 @@ class Crypto
      * @param bool   $raw_binary  Must match the $raw_binary flag used during encryption.
      *
      * @throws \TypeError                                      if argument types are wrong
-     * @throws Ex\EnvironmentIsBrokenException                 if the runtime environment is broken
+     * @throws Ex\Environment_Is_Broken_Exception                 if the runtime environment is broken
      * @throws Ex\Wrong_Key_Or_Modified_Ciphertext_Exception   if the key is wrong or the
      *                                                         ciphertext has been altered
      *
@@ -147,7 +145,7 @@ class Crypto
      * @param string $password    The same password used to encrypt the ciphertext.
      * @param bool   $raw_binary  Must match the $raw_binary flag used during encryption.
      *
-     * @throws Ex\EnvironmentIsBrokenException                 if the runtime environment is broken
+     * @throws Ex\Environment_Is_Broken_Exception                 if the runtime environment is broken
      * @throws Ex\Wrong_Key_Or_Modified_Ciphertext_Exception   if the password is wrong or
      *                                                         the ciphertext has been altered
      * @throws \TypeError if argument types are wrong
@@ -159,7 +157,7 @@ class Crypto
      */
     public static function decrypt_with_password(
         $ciphertext,
-        #[\Sensitive_Parameter]
+        #[\SensitiveParameter]
         $password,
         $raw_binary = false
     )
@@ -194,7 +192,7 @@ class Crypto
      * @param string $ciphertext  A ciphertext produced by the version 1 library.
      * @param string $key         The raw binary key string used with the V1 library.
      *
-     * @throws Ex\EnvironmentIsBrokenException                if the runtime environment is broken
+     * @throws Ex\Environment_Is_Broken_Exception                if the runtime environment is broken
      * @throws Ex\Wrong_Key_Or_Modified_Ciphertext_Exception  if the key is wrong or the
      *                                                        ciphertext has been altered
      * @throws \TypeError if argument types are wrong
@@ -205,7 +203,7 @@ class Crypto
      */
     public static function legacy_decrypt(
         $ciphertext,
-        #[\Sensitive_Parameter]
+        #[\SensitiveParameter]
         $key
     )
     {
@@ -215,10 +213,6 @@ class Crypto
         if (!\is_string($key)) {
             throw new \TypeError('String expected for argument 2. ' . \ucfirst(\gettype($key)) . ' given instead.');
         }
-        trigger_error(
-            'Crypto::legacy_decrypt() is deprecated since 2.0.0. Decrypt V1 ciphertexts and re-encrypt with Crypto::encrypt().',
-            \E_USER_DEPRECATED
-        );
         Runtime_Tests::runtime_test();
         // Extract the HMAC from the front of the ciphertext.
         if (Core::our_strlen($ciphertext) <= Core::LEGACY_MAC_BYTE_SIZE) {
@@ -288,8 +282,8 @@ class Crypto
      * @param string        $ciphertext
      * @param bool          $raw_binary
      *
-     * @throws Ex\EnvironmentIsBrokenException
-     * @throws Ex\WrongKeyOrModifiedCiphertextException
+     * @throws Ex\Environment_Is_Broken_Exception
+     * @throws Ex\Wrong_Key_Or_Modified_Ciphertext_Exception
      * @return string
      */
     private static function decrypt_internal($ciphertext, Key_Or_Password $secret, $raw_binary)
@@ -342,15 +336,15 @@ class Crypto
      * @param string $key
      * @param string $iv
      *
-     * @throws Ex\EnvironmentIsBrokenException
+     * @throws Ex\Environment_Is_Broken_Exception
      *
      * @return string
      */
     protected static function plain_encrypt(
         $plaintext,
-        #[\Sensitive_Parameter]
+        #[\SensitiveParameter]
         $key,
-        #[\Sensitive_Parameter]
+        #[\SensitiveParameter]
         $iv
     )
     {
@@ -369,15 +363,15 @@ class Crypto
      * @param string $iv
      * @param string $cipherMethod
      *
-     * @throws Ex\EnvironmentIsBrokenException
+     * @throws Ex\Environment_Is_Broken_Exception
      *
      * @return string
      */
     protected static function plain_decrypt(
         $ciphertext,
-        #[\Sensitive_Parameter]
+        #[\SensitiveParameter]
         $key,
-        #[\Sensitive_Parameter]
+        #[\SensitiveParameter]
         $iv,
         $cipher_method
     )
@@ -396,14 +390,14 @@ class Crypto
      * @param string $message
      * @param string $key
      *
-     * @throws Ex\EnvironmentIsBrokenException
+     * @throws Ex\Environment_Is_Broken_Exception
      *
      * @return bool
      */
     protected static function verify_hmac(
         $expected_hmac,
         $message,
-        #[\Sensitive_Parameter]
+        #[\SensitiveParameter]
         $key
     )
     {

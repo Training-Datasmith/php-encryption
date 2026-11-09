@@ -1,13 +1,11 @@
 <?php
-
-declare (strict_types=1);
 namespace Defuse\Crypto;
 
 use Defuse\Crypto\Exception as Ex;
 final class Key
 {
-    public const KEY_CURRENT_VERSION = "\xde\xf0\x00\x00";
-    public const KEY_BYTE_SIZE = 32;
+    const KEY_CURRENT_VERSION = "\xde\xf0\x00\x00";
+    const KEY_BYTE_SIZE = 32;
     /**
      * @var string
      */
@@ -15,7 +13,7 @@ final class Key
     /**
      * Creates new random key.
      *
-     * @throws Ex\EnvironmentIsBrokenException
+     * @throws Ex\Environment_Is_Broken_Exception
      *
      * @return Key
      */
@@ -26,20 +24,20 @@ final class Key
     /**
      * Loads a Key from its encoded form.
      *
-     * By default, this function will call Encoding::trimTrailingWhitespace()
+     * By default, this function will call Encoding::trim_trailing_whitespace()
      * to remove trailing CR, LF, NUL, TAB, and SPACE characters, which are
      * commonly appended to files when working with text editors.
      *
      * @param string $saved_key_string
      * @param bool $do_not_trim (default: false)
      *
-     * @throws Ex\BadFormatException
-     * @throws Ex\EnvironmentIsBrokenException
+     * @throws Ex\Bad_Format_Exception
+     * @throws Ex\Environment_Is_Broken_Exception
      *
      * @return Key
      */
     public static function load_from_ascii_safe_string(
-        #[\Sensitive_Parameter]
+        #[\SensitiveParameter]
         $saved_key_string,
         $do_not_trim = false
     )
@@ -53,7 +51,7 @@ final class Key
     /**
      * Encodes the Key into a string of printable ASCII characters.
      *
-     * @throws Ex\EnvironmentIsBrokenException
+     * @throws Ex\Environment_Is_Broken_Exception
      *
      * @return string
      */
@@ -75,10 +73,10 @@ final class Key
      *
      * @param string $bytes
      *
-     * @throws Ex\EnvironmentIsBrokenException
+     * @throws Ex\Environment_Is_Broken_Exception
      */
     private function __construct(
-        #[\Sensitive_Parameter]
+        #[\SensitiveParameter]
         $bytes
     )
     {
