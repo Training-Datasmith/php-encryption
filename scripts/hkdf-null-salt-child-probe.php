@@ -5,7 +5,6 @@
  */
 
 error_reporting(E_ALL);
-ini_set('display_errors', '0');
 
 if ($argc < 3) {
     fwrite(STDERR, "Usage: hkdf-null-salt-child-probe.php <native|fallback> <srcRoot>\n");

@@ -92,6 +92,7 @@ log "Composer update + audit + checks + PHPUnit (split gates)"
     composer audit --no-interaction --abandoned=report 2>&1 | tee /app/.system-test/composer-audit.out
     php scripts/check-cluster-pins.php 2>&1 | tee /app/.system-test/check-pins.out
     php scripts/check-rename.php 2>&1 | tee /app/.system-test/check-rename.out
+    php scripts/check-no-display-errors-override.php 2>&1 | tee /app/.system-test/check-display-errors.out
     php -r "require \"vendor/autoload.php\";" 2>&1 | tee /app/.system-test/bootstrap-load.out
 
     vendor/bin/phpunit --colors=never --log-junit /app/.system-test/phpunit-baseline.junit.xml \
@@ -112,6 +113,7 @@ gate_line "${AUDIT_GATE}" "${ROOT_DIR}/.system-test/composer-audit.out" "compose
 gate_line '^check-cluster-pins: all cluster packages match expected SHAs and aliases \([0-9]+ packages\)\.$' \
   "${ROOT_DIR}/.system-test/check-pins.out" "cluster pins"
 gate_line '^OK rename-check$' "${ROOT_DIR}/.system-test/check-rename.out" "rename check"
+gate_line '^OK no-display-errors override$' "${ROOT_DIR}/.system-test/check-display-errors.out" "display_errors check"
 
 gate_exact_committed "${ROOT_DIR}/.system-test/phpunit-baseline.out" \
   "${ROOT_DIR}/scripts/phpunit-baseline-line.txt" "PHPUnit baseline"
